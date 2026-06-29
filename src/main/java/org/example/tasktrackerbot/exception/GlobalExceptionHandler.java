@@ -23,10 +23,16 @@ public class GlobalExceptionHandler {
     }
 
     private void createExceptionHandlersMap() {
+
         exceptionHandlersMap.put(NullMessageException.class, (chatId, exception) ->
                 handleNullMessageException((NullMessageException) exception));
+
         exceptionHandlersMap.put(IllegalArgumentException.class, (chatId, exception) ->
                 handleIllegalArgumentException(chatId, (IllegalArgumentException) exception));
+
+        exceptionHandlersMap.put(InvalidCommandInputException.class, (chatId, exception) ->
+                handleInvalidCommandInputException(chatId, (InvalidCommandInputException) exception));
+
     }
 
     public void handle(String chatId, Exception exception) {
@@ -38,20 +44,26 @@ public class GlobalExceptionHandler {
     }
 
     public void handleNullMessageException(NullMessageException exception) {
-        log.error("Обработано исключение: {}, message {}", exception.getClass(), exception.getMessage());
+        log.warn("Обработано исключение: NullMessageException, message: {}", exception.getMessage());
     }
 
     public void handleIllegalArgumentException(String chatId, IllegalArgumentException exception) {
-        log.error("Обработано исключение: {} message: {}", exception.getClass(), exception.getMessage());
+        log.warn("Обработано исключение: IllegalArgumentException, message: {}", exception.getMessage());
         messageSender.sendMessage(chatId, exception.getMessage());
     }
+
+    public void handleInvalidCommandInputException(String chatId, InvalidCommandInputException exception) {
+        log.warn("Обработано исключение: InvalidCommandInputException, message: {}", exception.getMessage());
+        messageSender.sendMessageDefault(chatId);
+    }
+
 
     public void handleGeneralException(String chatId, Exception exception) {
         log.error("Необработанное исключение: {}", exception.getMessage());
         String text = """
                 Возникла непредвиденная ошибка!
                 Попробуйте повторить запрос позже или свяжитесь с поддержкой
-                """ + exception.getMessage();
+                """;
         messageSender.sendMessage(chatId, text);
     }
 

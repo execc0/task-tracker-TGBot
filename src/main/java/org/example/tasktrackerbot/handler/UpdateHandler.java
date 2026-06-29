@@ -3,6 +3,7 @@ package org.example.tasktrackerbot.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.commands.BotCommand;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
+import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         if (chatId == null) {
             return;
         }
+
         try {
             if (!update.getMessage().hasText()) {
                 throw new IllegalArgumentException("Текст сообщения пуст");
@@ -49,21 +51,23 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
             log.info("DEBUG: Список всех ключей в botCommandMap: {}", botCommandMap.keySet());
             log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
             String[] textMessageWords = update.getMessage().getText().trim().split(" ");
+            String command = textMessageWords[0];
 
-            if (botCommandMap.containsKey(textMessageWords[0])) {
-                String text = botCommandMap.get(textMessageWords[0]).execute(update);
-                messageSender.sendMessage(chatId, text);
-                return;
+            if (!botCommandMap.containsKey(command)) {
+                throw new InvalidCommandInputException("Ошибка! Введена неверная команда" + textMessageWords[0]);
             }
-            log.error("Ошибка! Введена неверная команда: {}", textMessageWords[0]);
-            messageSender.sendMessageDefault(chatId);
+
+            String text = botCommandMap.get(command).execute(update);
+            messageSender.sendMessage(chatId, text);
+
         } catch (Exception exception) {
             exceptionHandler.handle(chatId, exception);
         }
+
     }
 
 
-    public String extractChatId(Update update) {
+    private String extractChatId(Update update) {
         if(!update.hasMessage()) {
             exceptionHandler.handleNullMessageException(new NullMessageException("Ошибка! Сообщение отсутствует"));
             return null;
