@@ -13,8 +13,8 @@ public class TelegramClientConfig {
     @Value("${bot.secret}")
     private String botToken;
 
-    @Bean
-    public TelegramClient createClient() {
+    @Bean(name = "telegramClient")
+    public TelegramClient createTelegramClient() {
         return new OkHttpTelegramClient(botToken);
     }
 
