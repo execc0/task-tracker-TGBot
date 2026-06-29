@@ -1,16 +1,17 @@
 package org.example.tasktrackerbot.commands;
 
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
+import org.example.tasktrackerbot.handler.CommandHandler;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 public class RegisterCommand implements BotCommand {
 
-    private final TaskTrackerApiClient taskTrackerApiClient;
+    private final CommandHandler commandHandler;
 
-    public RegisterCommand(TaskTrackerApiClient taskTrackerApiClient) {
-        this.taskTrackerApiClient = taskTrackerApiClient;
+    public RegisterCommand(CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
     }
 
     @Override
@@ -20,7 +21,7 @@ public class RegisterCommand implements BotCommand {
 
     @Override
     public String execute(Update update) {
-        return taskTrackerApiClient.register(update);
+        return commandHandler.register(update);
     }
 
 }
