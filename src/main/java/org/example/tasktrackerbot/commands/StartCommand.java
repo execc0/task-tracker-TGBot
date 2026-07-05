@@ -19,7 +19,7 @@ public class StartCommand implements BotCommand {
     }
 
     @Override
-    public String execute(Update update) {
-        return botService.start();
+    public void execute(Update update) {
+        botService.start(update.getMessage().getChatId().toString());
     }
 }

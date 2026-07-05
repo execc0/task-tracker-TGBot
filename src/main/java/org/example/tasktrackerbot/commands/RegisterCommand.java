@@ -1,6 +1,7 @@
 package org.example.tasktrackerbot.commands;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.service.BotService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -21,20 +22,21 @@ public class RegisterCommand implements BotCommand {
     }
 
     @Override
-    public String execute(Update update) {
+    public void execute(Update update) {
 
         String[] textMessageWords = update.getMessage().getText().trim().split(" ");
+        String chatId = update.getMessage().getChatId().toString();
 
         if (textMessageWords.length != 5) {
             log.warn("Введён неверный формат команды /register: {}", textMessageWords[0]);
-            return """
+            throw new InvalidCommandInputException("""
                     Ошибка! Введён неверный формат строки для команды /register
                     Верный формат: /register name username email password
                     Пример: /register ExampleName ExampleUsername example@example.org Password123
-                    """;
+                    """);
         }
 
-        return botService.register(textMessageWords[1], textMessageWords[2], textMessageWords[3], textMessageWords[4]);
+        botService.register(textMessageWords[1], textMessageWords[2], textMessageWords[3], textMessageWords[4], chatId);
     }
 
 }

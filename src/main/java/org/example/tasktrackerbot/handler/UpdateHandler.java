@@ -6,7 +6,8 @@ import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@Service
+@Component
 @Slf4j
 public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
@@ -54,11 +55,11 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
             String command = textMessageWords[0];
 
             if (!botCommandMap.containsKey(command)) {
-                throw new InvalidCommandInputException("Ошибка! Введена неверная команда" + textMessageWords[0]);
+                throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + textMessageWords[0]
+                        + "\nДля начала работы введите /start");
             }
 
-            String text = botCommandMap.get(command).execute(update);
-            messageSender.sendMessage(chatId, text);
+            botCommandMap.get(command).execute(update);
 
         } catch (Exception exception) {
             exceptionHandler.handle(chatId, exception);

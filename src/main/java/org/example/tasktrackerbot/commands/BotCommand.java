@@ -6,6 +6,6 @@ public interface BotCommand {
 
     public String getCommand();
 
-    public String execute(Update update);
+    public void execute(Update update);
 
 }

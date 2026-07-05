@@ -33,6 +33,12 @@ public class GlobalExceptionHandler {
         exceptionHandlersMap.put(InvalidCommandInputException.class, (chatId, exception) ->
                 handleInvalidCommandInputException(chatId, (InvalidCommandInputException) exception));
 
+        exceptionHandlersMap.put(ApiLoginException.class, (chatId, exception) ->
+                handleApiLoginException(chatId, (ApiLoginException) exception));
+
+        exceptionHandlersMap.put(ApiRegisterException.class, (chatId, exception) ->
+                handleApiRegisterException(chatId, (ApiRegisterException) exception));
+
     }
 
     public void handle(String chatId, Exception exception) {
@@ -54,9 +60,18 @@ public class GlobalExceptionHandler {
 
     public void handleInvalidCommandInputException(String chatId, InvalidCommandInputException exception) {
         log.warn("Обработано исключение: InvalidCommandInputException, message: {}", exception.getMessage());
-        messageSender.sendMessageDefault(chatId);
+        messageSender.sendMessage(chatId, exception.getMessage());
     }
 
+    public void handleApiLoginException(String chatId, ApiLoginException exception) {
+        log.warn("Обработано исключение: ApiLoginException, message: {}", exception.getMessage());
+        messageSender.sendMessage(chatId, exception.getMessage());
+    }
+
+    public void handleApiRegisterException(String chatId, ApiRegisterException exception) {
+        log.warn("Обработано исключение: ApiRegisterException, message: {}", exception.getMessage());
+        messageSender.sendMessage(chatId, exception.getMessage());
+    }
 
     public void handleGeneralException(String chatId, Exception exception) {
         log.error("Необработанное исключение: {}", exception.getMessage());
