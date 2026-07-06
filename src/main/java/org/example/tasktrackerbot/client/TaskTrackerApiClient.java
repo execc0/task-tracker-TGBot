@@ -1,104 +1,119 @@
 package org.example.tasktrackerbot.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.DTO.request.LinkSocialRequest;
-import org.example.tasktrackerbot.DTO.request.LinkSocialRequestPayload;
-import org.example.tasktrackerbot.DTO.request.UserLoginRequest;
-import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
-import org.example.tasktrackerbot.DTO.response.UserResponse;
+import org.example.tasktrackerbot.DTO.request.*;
+import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
+import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
+import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
+import org.example.tasktrackerbot.DTO.response.AuthResponse;
 import org.example.tasktrackerbot.exception.ApiErrorResponse;
 import org.example.tasktrackerbot.exception.ApiLoginException;
 import org.example.tasktrackerbot.exception.ApiRegisterException;
+import org.example.tasktrackerbot.exception.SocialLinkException;
 import org.example.tasktrackerbot.security.SignatureService;
+import org.example.tasktrackerbot.service.TokenHandlerService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @Slf4j
 public class TaskTrackerApiClient {
 
     private final WebClient taskTrackerWebClient;
-    private final SignatureService signatureService;
+    private final TokenHandlerService tokenHandlerService;
 
-    public TaskTrackerApiClient(WebClient taskTrackerWebClient, SignatureService signatureService) {
+    public TaskTrackerApiClient(WebClient taskTrackerWebClient, SignatureService signatureService, TokenHandlerService tokenHandlerService) {
         this.taskTrackerWebClient = taskTrackerWebClient;
-        this.signatureService = signatureService;
+        this.tokenHandlerService = tokenHandlerService;
     }
 
 
 
-    public String register(UserRegisterRequest userRegisterRequest) {
+    public String registerAndLink(RegisterAndLinkRequest request, String chatId) {
 
-        return taskTrackerWebClient.post()
-                .uri("/auth/register")
-                .bodyValue(userRegisterRequest)
+        String token = taskTrackerWebClient.post()
+                .uri("/auth/register-and-link")
+                .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(ApiErrorResponse.class)
                                 .flatMap(errorBody -> {
                                     String errorMessage = extractErrorMessage(errorBody);
-                                    log.error("Ошибка при регистрации {}", errorMessage);
                                     return Mono.error(new ApiRegisterException("Ошибка при регистрации: " + errorMessage));
                                 }))
-                .bodyToMono(UserResponse.class)
+                .bodyToMono(AuthResponse.class)
                 .block()
                 .getToken();
 
+        log.info("Получен токен: {}", token);
+
+        return token;
+
+
     }
 
-    public String login(UserLoginRequest userLoginRequest, String chatId) {
+    public String loginAndLink(LoginAndLinkRequest request, String chatId) {
 
-        String token;
 
-        token = taskTrackerWebClient.post()
-                .uri("/auth/login")
-                .bodyValue(userLoginRequest)
+        String token = taskTrackerWebClient.post()
+                .uri("/auth/login-and-link")
+                .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(ApiErrorResponse.class)
                                 .flatMap(errorBody -> {
                                     String errorMessage = extractErrorMessage(errorBody);
-                                    log.error("Ошибка при логине {}", errorMessage);
                                     return Mono.error(new ApiLoginException("Ошибка при логине: " + errorMessage));
                                 })
                 )
-                .bodyToMono(UserResponse.class)
+                .bodyToMono(AuthResponse.class)
                 .block()
                 .getToken();
 
-        LinkSocialRequestPayload payload = new LinkSocialRequestPayload("Telegram", chatId, System.currentTimeMillis());
-        String signature = signatureService.createSignature(payload);
-        LinkSocialRequest linkSocialRequest = new LinkSocialRequest(payload, signature);
-        linkSocial(linkSocialRequest);
+        log.info("Получен токен: {}", token);
 
-        return """
-                Вы успешно вошли в аккаунт
-                """;
+        return token;
+
 
     }
 
-    public void linkSocial(LinkSocialRequest linkSocialRequest) {
+    public void unlink(UnlinkSocialRequest request) {
 
         taskTrackerWebClient.post()
-                .uri("/auth/link-social")
-                .bodyValue(linkSocialRequest)
+                .uri("/auth/unlink-social")
+                .bodyValue(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(ApiErrorResponse.class)
                                 .flatMap(errorBody -> {
                                     String errorMessage = extractErrorMessage(errorBody);
-                                    log.error("Ошибка при попытке связать аккаунт: {}", errorMessage);
-                                    return Mono.error(new ApiLoginException("Ошибка при логине: " + errorMessage));
+                                    return Mono.error(new SocialLinkException("Ошибка при попытке отвязать аккаунт: " + errorMessage));
                                 })
                 )
                 .toBodilessEntity()
                 .block();
+
+    }
+
+    public String loginByChatId(LoginByChatIdRequest request) {
+
+        return taskTrackerWebClient.post()
+                .uri("/auth/login/telegram")
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(ApiErrorResponse.class)
+                                .flatMap(errorBody -> {
+                                    String errorMessage = extractErrorMessage(errorBody);
+                                    return Mono.error(new ApiLoginException("Ошибка! Необходима авторизация " + errorMessage));
+                                })
+                )
+                .bodyToMono(AuthResponse.class)
+                .block()
+                .getToken();
 
     }
 
@@ -109,7 +124,7 @@ public class TaskTrackerApiClient {
         if (response.message() != null) {
             return response.message();
         }
-        return "Неизвестная ошибка сервера";
+        throw new RuntimeException("Неизвестная ошибка сервера");
     }
 
 }

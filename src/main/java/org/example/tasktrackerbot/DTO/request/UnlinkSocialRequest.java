@@ -5,12 +5,14 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LinkSocialRequestPayload {
+public class UnlinkSocialRequest {
+
+    private String username;
+
+    private String password;
 
     private String provider;
 
     private String providerId;
-
-    private Long timestamp;
 
 }

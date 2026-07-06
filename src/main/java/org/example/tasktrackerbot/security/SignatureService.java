@@ -1,7 +1,7 @@
 package org.example.tasktrackerbot.security;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.DTO.request.LinkSocialRequestPayload;
+import org.example.tasktrackerbot.DTO.request.signable.Signable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +11,8 @@ import io.jsonwebtoken.security.Keys;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,11 +26,11 @@ public class SignatureService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createSignature(LinkSocialRequestPayload payload) {
+    public String createSignature(Signable requestToSign) {
 
         try {
 
-            String dataToSign = toCanonicalString(payload);
+            String dataToSign = toCanonicalString(requestToSign);
 
             SecretKey secretKey = getSigningKey(this.secretKey);
 
@@ -52,8 +54,12 @@ public class SignatureService {
         return sb.toString();
     }
 
-    private String toCanonicalString(LinkSocialRequestPayload payload) {
-        return String.format("%s|%s|%d", payload.getProviderId(), payload.getProviderId(), payload.getTimestamp());
+    private String toCanonicalString(Signable signable) {
+        List<Object> listOfFields = signable.getSignableFields();
+
+        return listOfFields.stream()
+                .map(field -> field.toString())
+                .collect(Collectors.joining("|"));
     }
 
 }

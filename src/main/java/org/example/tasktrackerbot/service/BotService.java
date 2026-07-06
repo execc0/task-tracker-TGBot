@@ -1,9 +1,13 @@
 package org.example.tasktrackerbot.service;
 
-import org.example.tasktrackerbot.DTO.request.UserLoginRequest;
-import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
+import org.example.tasktrackerbot.DTO.request.*;
+import org.example.tasktrackerbot.DTO.request.signable.LinkRequest;
+import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
+import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
+import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
 import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.security.SignatureService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,10 +15,29 @@ public class BotService {
 
     private final TaskTrackerApiClient taskTrackerApiClient;
     private final MessageSender messageSender;
+    private final SignatureService signatureService;
+    private final TokenHandlerService tokenHandlerService;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
+        this.signatureService = signatureService;
+        this.tokenHandlerService = tokenHandlerService;
+    }
+
+    public void authorizeByChatId(String chatId) {
+
+        if (tokenHandlerService.hasToken(chatId)) {
+            return;
+        }
+
+        LoginByChatIdRequest loginByChatIdRequest = new LoginByChatIdRequest(chatId, System.currentTimeMillis(), null);
+        loginByChatIdRequest.setSignature(signatureService.createSignature(loginByChatIdRequest));
+
+        String token = taskTrackerApiClient.loginByChatId(loginByChatIdRequest);
+
+        tokenHandlerService.saveToken(chatId, token);
+
     }
 
     public void start(String chatId) {
@@ -30,23 +53,60 @@ public class BotService {
 
     public void register(String name, String username, String email, String password, String chatId) {
 
-        UserRegisterRequest userRegisterRequest = new UserRegisterRequest(name, username, email, password);
+        if (tokenHandlerService.hasToken(chatId)) {
+            messageSender.sendMessage(chatId, "Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink");
+            return;
+        }
 
-        String message = taskTrackerApiClient.register(userRegisterRequest);
+        UserRegisterRequest registerRequest = new UserRegisterRequest(name, username, email, password);
+        LinkRequest linkRequest =  new LinkRequest("Telegram", chatId, System.currentTimeMillis(), null);
+        linkRequest.setSignature(signatureService.createSignature(linkRequest));
 
-        messageSender.sendMessage(chatId, message);
+        RegisterAndLinkRequest registerAndLinkRequest = new RegisterAndLinkRequest(registerRequest, linkRequest);
+
+        String token = taskTrackerApiClient.registerAndLink(registerAndLinkRequest, chatId);
+        tokenHandlerService.saveToken(chatId, token);
+
+
+        messageSender.sendMessage(chatId, "Регистрация прошла успешно");
 
     }
 
     public void login(String username, String password, String chatId) {
 
-        UserLoginRequest userLoginRequest = new UserLoginRequest();
-        userLoginRequest.setUsername(username);
-        userLoginRequest.setPassword(password);
+        if (tokenHandlerService.hasToken(chatId)) {
+            messageSender.sendMessage(chatId, "Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink");
+            return;
+        }
 
-        String message = taskTrackerApiClient.login(userLoginRequest, chatId);
+        UserLoginRequest userLoginRequest = new UserLoginRequest(username, password);
 
-        messageSender.sendMessage(chatId, message);
+        LinkRequest linkRequest = new LinkRequest("Telegram", chatId, System.currentTimeMillis(), null);
+        linkRequest.setSignature(signatureService.createSignature(linkRequest));
+
+        LoginAndLinkRequest loginAndLinkRequest = new LoginAndLinkRequest(userLoginRequest, linkRequest);
+
+        String token = taskTrackerApiClient.loginAndLink(loginAndLinkRequest, chatId);
+
+        tokenHandlerService.saveToken(chatId, token);
+
+        messageSender.sendMessage(chatId, "Авторизация прошла успешно");
+
+    }
+
+    public void unlink(String username, String password, String chatId) {
+
+        UnlinkSocialRequest unlinkSocialRequest = new UnlinkSocialRequest(username, password, "Telegram", chatId);
+
+        tokenHandlerService.deleteToken(chatId); // удаляем заранее
+
+        taskTrackerApiClient.unlink(unlinkSocialRequest);
+
+        tokenHandlerService.deleteToken(chatId); // на случай ре-авторизации
+
+        messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
+
+
     }
 
 }

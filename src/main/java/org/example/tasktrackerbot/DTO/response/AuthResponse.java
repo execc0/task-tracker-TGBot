@@ -3,7 +3,7 @@ package org.example.tasktrackerbot.DTO.response;
 import lombok.Data;
 
 @Data
-public class UserResponse {
+public class AuthResponse {
 
     private String token;
 

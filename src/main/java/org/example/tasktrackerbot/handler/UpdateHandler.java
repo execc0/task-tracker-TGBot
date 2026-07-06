@@ -5,9 +5,8 @@ import org.example.tasktrackerbot.commands.BotCommand;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
-import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.service.BotService;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -22,12 +21,12 @@ import java.util.Map;
 public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
     private final Map<String, BotCommand> botCommandMap;
-    private final MessageSender messageSender;
     private final GlobalExceptionHandler exceptionHandler;
+    private final BotService botService;
 
-    public UpdateHandler(Map<String, BotCommand> botCommandMap, MessageSender messageSender, GlobalExceptionHandler exceptionHandler) {
+    public UpdateHandler(Map<String, BotCommand> botCommandMap, GlobalExceptionHandler exceptionHandler, BotService botService) {
         this.botCommandMap = botCommandMap;
-        this.messageSender = messageSender;
+        this.botService = botService;
         this.exceptionHandler = exceptionHandler;
     }
 
@@ -53,6 +52,10 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
             log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
             String[] textMessageWords = update.getMessage().getText().trim().split(" ");
             String command = textMessageWords[0];
+
+            if(!command.equals("/login") && !command.equals("/register")) {
+                botService.authorizeByChatId(chatId);
+            }
 
             if (!botCommandMap.containsKey(command)) {
                 throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + textMessageWords[0]

@@ -39,6 +39,9 @@ public class GlobalExceptionHandler {
         exceptionHandlersMap.put(ApiRegisterException.class, (chatId, exception) ->
                 handleApiRegisterException(chatId, (ApiRegisterException) exception));
 
+        exceptionHandlersMap.put(SocialLinkException.class, ((chatId, exception) ->
+                handleSocialLinkException(chatId, (SocialLinkException) exception)));
+
     }
 
     public void handle(String chatId, Exception exception) {
@@ -50,31 +53,36 @@ public class GlobalExceptionHandler {
     }
 
     public void handleNullMessageException(NullMessageException exception) {
-        log.warn("Обработано исключение: NullMessageException, message: {}", exception.getMessage());
+        log.warn("Обработано исключение: NullMessageException, message: {}", exception.getMessage(), exception);
     }
 
     public void handleIllegalArgumentException(String chatId, IllegalArgumentException exception) {
-        log.warn("Обработано исключение: IllegalArgumentException, message: {}", exception.getMessage());
+        log.warn("Обработано исключение: IllegalArgumentException, message: {}", exception.getMessage(), exception);
         messageSender.sendMessage(chatId, exception.getMessage());
     }
 
     public void handleInvalidCommandInputException(String chatId, InvalidCommandInputException exception) {
-        log.warn("Обработано исключение: InvalidCommandInputException, message: {}", exception.getMessage());
+        log.warn("Обработано исключение: InvalidCommandInputException, message: {}", exception.getMessage(), exception);
         messageSender.sendMessage(chatId, exception.getMessage());
     }
 
     public void handleApiLoginException(String chatId, ApiLoginException exception) {
-        log.warn("Обработано исключение: ApiLoginException, message: {}", exception.getMessage());
+        log.warn("Обработано исключение: ApiLoginException, message: {}", exception.getMessage(), exception);
         messageSender.sendMessage(chatId, exception.getMessage());
     }
 
     public void handleApiRegisterException(String chatId, ApiRegisterException exception) {
-        log.warn("Обработано исключение: ApiRegisterException, message: {}", exception.getMessage());
+        log.warn("Обработано исключение: ApiRegisterException, message: {}", exception.getMessage(), exception);
+        messageSender.sendMessage(chatId, exception.getMessage());
+    }
+
+    public void handleSocialLinkException(String chatId, SocialLinkException exception) {
+        log.warn("Обработано исключение: SocialLinkException, message: {}", exception.getMessage(), exception);
         messageSender.sendMessage(chatId, exception.getMessage());
     }
 
     public void handleGeneralException(String chatId, Exception exception) {
-        log.error("Необработанное исключение: {}", exception.getMessage());
+        log.error("Необработанное исключение: {}", exception.getMessage(), exception);
         String text = """
                 Возникла непредвиденная ошибка!
                 Попробуйте повторить запрос позже или свяжитесь с поддержкой
