@@ -10,10 +10,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 public class RegisterCommand implements BotCommand {
 
-    private final BotService botService;
+    private final BotService botCommandService;
 
-    public RegisterCommand(BotService botService) {
-        this.botService = botService;
+    public RegisterCommand(BotService botCommandService) {
+        this.botCommandService = botCommandService;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RegisterCommand implements BotCommand {
                     """);
         }
 
-        botService.register(textMessageWords[1], textMessageWords[2], textMessageWords[3], textMessageWords[4], chatId);
+        botCommandService.register(textMessageWords[1], textMessageWords[2], textMessageWords[3], textMessageWords[4], chatId);
     }
 
 }

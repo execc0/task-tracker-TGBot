@@ -6,8 +6,10 @@ import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
 import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
+import org.example.tasktrackerbot.keyboard.AuthKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
+import org.example.tasktrackerbot.session.TokenHandlerService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,12 +19,14 @@ public class BotService {
     private final MessageSender messageSender;
     private final SignatureService signatureService;
     private final TokenHandlerService tokenHandlerService;
+    private final AuthKeyboard authKeyboard;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
         this.tokenHandlerService = tokenHandlerService;
+        this.authKeyboard = authKeyboard;
     }
 
     public void authorizeByChatId(String chatId) {
@@ -48,7 +52,7 @@ public class BotService {
         /login
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
-        messageSender.sendMessage(chatId, message);
+        messageSender.sendKeyboardMessage(chatId, message, authKeyboard.authMenu());
     }
 
     public void register(String name, String username, String email, String password, String chatId) {

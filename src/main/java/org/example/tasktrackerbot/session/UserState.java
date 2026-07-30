@@ -1,0 +1,11 @@
+package org.example.tasktrackerbot.session;
+
+public enum UserState {
+    NONE,
+    REGISTER_AWAITING_USERNAME,
+    REGISTER_AWAITING_EMAIL,
+    REGISTER_AWAITING_NAME,
+    REGISTER_AWAITING_PASSWORD,
+    LOGIN_AWAITING_USERNAME,
+    LOGIN_AWAITING_PASSWORD
+}

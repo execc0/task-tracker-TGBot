@@ -11,7 +11,7 @@ import org.example.tasktrackerbot.exception.ApiLoginException;
 import org.example.tasktrackerbot.exception.ApiRegisterException;
 import org.example.tasktrackerbot.exception.SocialLinkException;
 import org.example.tasktrackerbot.security.SignatureService;
-import org.example.tasktrackerbot.service.TokenHandlerService;
+import org.example.tasktrackerbot.session.TokenHandlerService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -108,7 +108,7 @@ public class TaskTrackerApiClient {
                         response.bodyToMono(ApiErrorResponse.class)
                                 .flatMap(errorBody -> {
                                     String errorMessage = extractErrorMessage(errorBody);
-                                    return Mono.error(new ApiLoginException("Ошибка! Необходима авторизация " + errorMessage));
+                                    return Mono.error(new ApiLoginException("Ошибка! Необходима авторизация. Для начала работы введите /start"));
                                 })
                 )
                 .bodyToMono(AuthResponse.class)

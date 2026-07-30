@@ -3,6 +3,7 @@ package org.example.tasktrackerbot.responder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -20,13 +21,17 @@ public class MessageSender {
 
         SendMessage sendMessage = new SendMessage(chatId, message);
 
-        try {
-            telegramClient.execute(sendMessage);
-            log.info("Сообщение успешно отправлено, chatId: {}", chatId);
-        } catch (TelegramApiException e) {
-            log.error("Ошибка! Сообщение не было отправлено: {}", e.getMessage());
-        }
+        execute(sendMessage, chatId);
 
+    }
+
+    public void sendKeyboardMessage(String chatId, String message, InlineKeyboardMarkup markup) {
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .text(message)
+                .replyMarkup(markup)
+                .build();
+        execute(sendMessage, chatId);
     }
 
     public void sendMessageDefault(String chatId) {
@@ -36,5 +41,14 @@ public class MessageSender {
                 /start
                 """;
         sendMessage(chatId, text);
+    }
+
+    private void execute(SendMessage sendMessage, String chatId) {
+        try {
+            telegramClient.execute(sendMessage);
+            log.info("Сообщение успешно отправлено, chatId: {}", chatId);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка! Сообщение не было отправлено: {}", e.getMessage());
+        }
     }
 }

@@ -10,10 +10,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Slf4j
 public class LoginCommand implements BotCommand {
 
-    private final BotService botService;
+    private final BotService botCommandService;
 
-    public LoginCommand(BotService botService) {
-        this.botService = botService;
+    public LoginCommand(BotService botCommandService) {
+        this.botCommandService = botCommandService;
     }
 
     @Override
@@ -35,6 +35,6 @@ public class LoginCommand implements BotCommand {
                     """);
         }
 
-        botService.login(textMessageWords[1], textMessageWords[2], update.getMessage().getChatId().toString());
+        botCommandService.login(textMessageWords[1], textMessageWords[2], update.getMessage().getChatId().toString());
     }
 }
