@@ -2,11 +2,11 @@ package org.example.tasktrackerbot.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.commands.BotCommand;
+import org.example.tasktrackerbot.commands.dispatcher.BotCommandDispatcher;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
-import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.queries.CallbackQuery;
-import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
 import org.example.tasktrackerbot.session.StepHandler;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
@@ -24,23 +24,20 @@ import java.util.Map;
 @Slf4j
 public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
-    private final Map<String, BotCommand> botCommandMap;
+    private final BotCallbackQueryDispatcher callbackQueryDispatcher;
     private final GlobalExceptionHandler exceptionHandler;
-    private final BotService botCommandService;
-    private final Map<String, CallbackQuery> botQueryMap;
+    private final BotCommandDispatcher commandDispatcher;
     private final UserStateService userStateService;
     private final Map<UserState, StepHandler> registrationHandlerMap;
 
-    public UpdateHandler(Map<String, BotCommand> botCommandMap,
-                         GlobalExceptionHandler exceptionHandler,
-                         BotService botCommandService,
-                         Map<String, CallbackQuery> botQueryMap,
+    public UpdateHandler(GlobalExceptionHandler exceptionHandler,
+                         BotCommandDispatcher commandDispatcher,
+                         BotCallbackQueryDispatcher callbackQueryDispatcher,
                          UserStateService userStateService,
                          Map<UserState, StepHandler> registrationHandlerMap) {
-        this.botCommandMap = botCommandMap;
-        this.botCommandService = botCommandService;
+        this.callbackQueryDispatcher = callbackQueryDispatcher;
         this.exceptionHandler = exceptionHandler;
-        this.botQueryMap = botQueryMap;
+        this.commandDispatcher = commandDispatcher;
         this.userStateService = userStateService;
         this.registrationHandlerMap = registrationHandlerMap;
     }
@@ -60,18 +57,19 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
         try {
 
-            // Callback - нажатие на кнопки
+            // Callback - обработка нажатий на кнопки
             if (update.getCallbackQuery() != null) {
-                handleCallback(update, chatId);
+                callbackQueryDispatcher.dispatchCallbackQuery(update, chatId);
                 return;
             }
 
+            // Если нет текста и не было нажатия на кнопку - проблема
             if (!update.getMessage().hasText()) {
                 throw new IllegalArgumentException("Текст сообщения пуст");
             }
             log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
 
-            // State - ввод после нажатия на кнопку
+            // State - обработка ввода после нажатия на кнопку
             if(userStateService.getState(chatId) != UserState.NONE) {
                 registrationHandlerMap.get(userStateService.getState(chatId)).handle(chatId, update.getMessage().getText());
                 return;
@@ -79,17 +77,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
             // Обработка обычных команд
             String command = parseCommand(update);
-
-            if(!command.equals("/login") && !command.equals("/register") && !command.equals("/start")) {
-                botCommandService.authorizeByChatId(chatId);
-            }
-
-            if (!botCommandMap.containsKey(command)) {
-                throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + command
-                        + "\nДля начала работы введите /start");
-            }
-
-            botCommandMap.get(command).execute(update);
+            commandDispatcher.dispatchCommand(update, command, chatId);
 
         } catch (Exception exception) {
             exceptionHandler.handle(chatId, exception);
@@ -109,10 +97,6 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         return null;
     }
 
-    private void handleCallback(Update update, String chatId) {
-        String query = update.getCallbackQuery().getData();
-        botQueryMap.get(query).execute(chatId);
-    }
 
     private String parseCommand(Update update) {
         String[] textMessageWords = update.getMessage().getText().trim().split(" ");
