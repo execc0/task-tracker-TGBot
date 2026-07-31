@@ -27,13 +27,14 @@ public class UnlinkCommand implements BotCommand {
 
         String[] textMessageWords = update.getMessage().getText().trim().split(" ");
         String chatId = update.getMessage().getChatId().toString();
+        String command = textMessageWords[0];
 
         if (textMessageWords.length != 3) {
-            log.warn("Введён неверный формат команды /unlink: {}", textMessageWords[0]);
             throw new InvalidCommandInputException("""
                     Ошибка! Введён неверный формат строки для команды /unlink
                     Верный формат: /unlink username password
-                    """);
+                    """,
+                    String.format("Введён неверный формат команды /unlink: %s", command));
         }
 
         botCommandService.unlink(textMessageWords[1], textMessageWords[2], chatId);

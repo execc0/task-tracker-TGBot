@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.commands.BotCommand;
 import org.example.tasktrackerbot.commands.dispatcher.BotCommandDispatcher;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
+import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.queries.CallbackQuery;
 import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
@@ -65,7 +66,8 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
             // Если нет текста и не было нажатия на кнопку - проблема
             if (!update.getMessage().hasText()) {
-                throw new IllegalArgumentException("Текст сообщения пуст");
+                throw new InvalidCommandInputException("Текст сообщения пуст",
+                        String.format("Сообщение chatId: %s не имеет текста", chatId));
             }
             log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
 
@@ -93,7 +95,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getMessage().getChatId().toString();
         }
-        exceptionHandler.handleNullMessageException(new NullMessageException("Ошибка! Сообщение отсутствует"));
+        exceptionHandler.handleGeneral(new NullMessageException("Ошибка! Сообщение отсутствует"));
         return null;
     }
 

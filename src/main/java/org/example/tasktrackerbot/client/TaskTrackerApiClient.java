@@ -1,54 +1,53 @@
 package org.example.tasktrackerbot.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.DTO.request.*;
 import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
 import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.DTO.response.AuthResponse;
-import org.example.tasktrackerbot.exception.ApiErrorResponse;
-import org.example.tasktrackerbot.exception.ApiLoginException;
-import org.example.tasktrackerbot.exception.ApiRegisterException;
-import org.example.tasktrackerbot.exception.SocialLinkException;
-import org.example.tasktrackerbot.security.SignatureService;
-import org.example.tasktrackerbot.session.TokenHandlerService;
+import org.example.tasktrackerbot.exception.*;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestClient;
+
+import java.io.IOException;
 
 
 @Component
 @Slf4j
 public class TaskTrackerApiClient {
 
-    private final WebClient taskTrackerWebClient;
-    private final TokenHandlerService tokenHandlerService;
+    private final RestClient taskTrackerRestClient;
+    private final ObjectMapper objectMapper;
 
-    public TaskTrackerApiClient(WebClient taskTrackerWebClient, SignatureService signatureService, TokenHandlerService tokenHandlerService) {
-        this.taskTrackerWebClient = taskTrackerWebClient;
-        this.tokenHandlerService = tokenHandlerService;
+    public TaskTrackerApiClient(RestClient taskTrackerRestClient,
+                                ObjectMapper objectMapper) {
+        this.taskTrackerRestClient = taskTrackerRestClient;
+        this.objectMapper = objectMapper;
     }
 
 
 
     public String registerAndLink(RegisterAndLinkRequest request, String chatId) {
 
-        String token = taskTrackerWebClient.post()
+        String token = taskTrackerRestClient.post()
                 .uri("/auth/register-and-link")
-                .bodyValue(request)
+                .body(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(ApiErrorResponse.class)
-                                .flatMap(errorBody -> {
-                                    String errorMessage = extractErrorMessage(errorBody);
-                                    return Mono.error(new ApiRegisterException("Ошибка при регистрации: " + errorMessage));
-                                }))
-                .bodyToMono(AuthResponse.class)
-                .block()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                    String message = extractErrorMessage(response);
+                    throw new ApiRegisterException(message,
+                            String.format("Ошибка при вызове API, StatusCode: %s метод: registerAndLink, сообщение: %s",
+                                    response.getStatusCode(), message));
+                }
+                )
+                .body(AuthResponse.class)
                 .getToken();
 
-        log.info("Получен токен: {}", token);
+        log.debug("Получен токен: {}", token);
 
         return token;
 
@@ -58,22 +57,21 @@ public class TaskTrackerApiClient {
     public String loginAndLink(LoginAndLinkRequest request, String chatId) {
 
 
-        String token = taskTrackerWebClient.post()
-                .uri("/auth/login-and-link")
-                .bodyValue(request)
+        String token = taskTrackerRestClient.post()
+                .uri("/auth/register-and-link")
+                .body(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(ApiErrorResponse.class)
-                                .flatMap(errorBody -> {
-                                    String errorMessage = extractErrorMessage(errorBody);
-                                    return Mono.error(new ApiLoginException("Ошибка при логине: " + errorMessage));
-                                })
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiLoginException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: loginAndLink, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
                 )
-                .bodyToMono(AuthResponse.class)
-                .block()
+                .body(AuthResponse.class)
                 .getToken();
 
-        log.info("Получен токен: {}", token);
+        log.debug("Получен токен: {}", token);
 
         return token;
 
@@ -82,49 +80,54 @@ public class TaskTrackerApiClient {
 
     public void unlink(UnlinkSocialRequest request) {
 
-        taskTrackerWebClient.post()
+        taskTrackerRestClient.post()
                 .uri("/auth/unlink-social")
-                .bodyValue(request)
+                .body(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(ApiErrorResponse.class)
-                                .flatMap(errorBody -> {
-                                    String errorMessage = extractErrorMessage(errorBody);
-                                    return Mono.error(new SocialLinkException("Ошибка при попытке отвязать аккаунт: " + errorMessage));
-                                })
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiUnlinkException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: unlink, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
                 )
-                .toBodilessEntity()
-                .block();
+                .toBodilessEntity();
 
     }
 
     public String loginByChatId(LoginByChatIdRequest request) {
 
-        return taskTrackerWebClient.post()
+        return taskTrackerRestClient.post()
                 .uri("/auth/login/telegram")
-                .bodyValue(request)
+                .body(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(ApiErrorResponse.class)
-                                .flatMap(errorBody -> {
-                                    String errorMessage = extractErrorMessage(errorBody);
-                                    return Mono.error(new ApiLoginException("Ошибка! Необходима авторизация. Для начала работы введите /start"));
-                                })
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiUnlinkException("Необходима авторизация. Для начала работы введите команду /start",
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: loginByChatId, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
                 )
-                .bodyToMono(AuthResponse.class)
-                .block()
+                .body(AuthResponse.class)
                 .getToken();
 
     }
 
-    private String extractErrorMessage(ApiErrorResponse response) {
-        if (response.errors() != null && !response.errors().isEmpty()) {
-            return String.join(",", response.errors());
+
+    private String extractErrorMessage(ClientHttpResponse response) throws IOException {
+
+        ApiErrorResponse responseBody = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
+
+        if (responseBody.errors() != null && !responseBody.errors().isEmpty()) {
+            return String.join(",", responseBody.errors());
         }
-        if (response.message() != null) {
-            return response.message();
+        if (responseBody.message() != null) {
+            return responseBody.message();
         }
-        throw new RuntimeException("Неизвестная ошибка сервера");
+        throw new ApiServerError("Внутрення ошибка сервера. Повторите попытку позже",
+                "Ошибка при парсинге сообщения об ошибке" + responseBody);
     }
+
+
 
 }

@@ -26,14 +26,14 @@ public class RegisterCommand implements BotCommand {
 
         String[] textMessageWords = update.getMessage().getText().trim().split(" ");
         String chatId = update.getMessage().getChatId().toString();
+        String command = textMessageWords[0];
 
         if (textMessageWords.length != 5) {
-            log.warn("Введён неверный формат команды /register: {}", textMessageWords[0]);
             throw new InvalidCommandInputException("""
                     Ошибка! Введён неверный формат строки для команды /register
                     Верный формат: /register name username email password
                     Пример: /register ExampleName ExampleUsername example@example.org Password123
-                    """);
+                    """, String.format("Введён неверный формат команды /register: %s", command));
         }
 
         botCommandService.register(textMessageWords[1], textMessageWords[2], textMessageWords[3], textMessageWords[4], chatId);

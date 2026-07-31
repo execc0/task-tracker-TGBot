@@ -25,14 +25,15 @@ public class LoginCommand implements BotCommand {
     public void execute(Update update) {
 
         String[] textMessageWords = update.getMessage().getText().trim().split(" ");
+        String command = textMessageWords[0];
 
         if(textMessageWords.length != 3) {
-            log.warn("Введён неверный формат команды /login: {}", textMessageWords[0]);
             throw new InvalidCommandInputException("""
                     Ошибка! Введён неверный формат строки для команды /login
                     Верный формат: /login username password
                     Пример: /login ExampleUsername Password123
-                    """);
+                    """,
+                    String.format("Введён неверный формат команды /login: %s", command));
         }
 
         botCommandService.login(textMessageWords[1], textMessageWords[2], update.getMessage().getChatId().toString());
