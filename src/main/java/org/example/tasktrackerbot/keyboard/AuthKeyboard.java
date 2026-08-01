@@ -26,8 +26,14 @@ public class AuthKeyboard implements Keyboard {
                 .callbackData("auth:unlink")
                 .build();
 
+        InlineKeyboardButton menuButton = InlineKeyboardButton.builder()
+                .text("Основное меню")
+                .callbackData("menu:main")
+                .build();
+
         return InlineKeyboardMarkup.builder()
                 .keyboardRow(new InlineKeyboardRow(registerButton, loginButton, unlinkButton))
+                .keyboardRow(new InlineKeyboardRow(menuButton))
                 .build();
     }
 

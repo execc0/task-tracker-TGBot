@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.buttons;
+package org.example.tasktrackerbot.queries.flow;
 
 import org.example.tasktrackerbot.service.RegistrationStepService;
 import org.springframework.stereotype.Component;

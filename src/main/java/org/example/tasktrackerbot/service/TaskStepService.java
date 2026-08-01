@@ -17,24 +17,17 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-public class TaskStepService implements StepHandlerProvider {
+public class TaskStepService extends AbstractStateService implements StepHandlerProvider {
 
-    private final BotService botCommandService;
-    private final MessageSender messageSender;
-    private final UserStateService userStateService;
-    private final ObjectMapper objectMapper;
     private final TaskPriorityKeyboard taskPriorityKeyboard;
     private final TaskStatusKeyboard taskStatusKeyboard;
 
 
-    public TaskStepService(BotService botCommandService,
+    public TaskStepService(BotService botService,
                            MessageSender messageSender,
                            UserStateService userStateService,
                            ObjectMapper objectMapper, TaskPriorityKeyboard taskPriorityKeyboard, TaskStatusKeyboard taskStatusKeyboard) {
-        this.botCommandService = botCommandService;
-        this.messageSender = messageSender;
-        this.userStateService = userStateService;
-        this.objectMapper = objectMapper;
+        super(botService, messageSender, userStateService, objectMapper);
         this.taskPriorityKeyboard = taskPriorityKeyboard;
         this.taskStatusKeyboard = taskStatusKeyboard;
     }
@@ -49,43 +42,36 @@ public class TaskStepService implements StepHandlerProvider {
 
     public void startTaskCreation(String chatId) {
 
-        if (userStateService.getState(chatId) != UserState.NONE) {
-            messageSender.sendMessage(chatId, "Предыдущий диалог отменён");
-        }
-
-        userStateService.clearState(chatId);
-        userStateService.clearTemp(chatId);
-        userStateService.setState(chatId, UserState.TASK_CREATE_AWAITING_TITLE);
-        messageSender.sendMessage(chatId, "Введите название задачи: ");
+        super.start(chatId, UserState.TASK_CREATE_AWAITING_TITLE, "Введите название задачи: ");
 
     }
 
     public void handleTitleStep(String chatId, String title) {
-        userStateService.setState(chatId, UserState.TASK_CREATE_AWAITING_DESCRIPTION);
-        userStateService.setTemp(chatId, "title", title);
-        messageSender.sendMessage(chatId, "Введите описание задачи: ");
+
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_DESCRIPTION, "title", title, "Введите описание задачи: ");
 
     }
 
     public void handleDescriptionStep(String chatId, String description) {
-        userStateService.setState(chatId, UserState.TASK_CREATE_AWAITING_PRIORITY);
-        userStateService.setTemp(chatId, "description", description);
-        messageSender.sendKeyboardMessage(chatId, "Выберите приоритет задачи: ", taskPriorityKeyboard.getKeyboard());
+
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_PRIORITY, "description",
+                description, "Выберите приоритет задачи: ", taskPriorityKeyboard.getKeyboard());
+
     }
 
     public void handlePriorityStep(String chatId, String priority) {
-        userStateService.setState(chatId, UserState.TASK_CREATE_AWAITING_STATUS);
-        userStateService.setTemp(chatId, "description", priority);
-        messageSender.sendKeyboardMessage(chatId, "Выберите статус задачи: ", taskStatusKeyboard.getKeyboard());
+
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_STATUS, "priority",
+                priority, "Выберите статус задачи: ", taskStatusKeyboard.getKeyboard());
+
     }
 
     public void handleStatusStep(String chatId, String status) {
+
         userStateService.setTemp(chatId, "status", status);
-        Map<Object, Object> map = userStateService.getAllTempFields(chatId);
-        TaskCreateRequest request = objectMapper.convertValue(map, TaskCreateRequest.class);
-        botCommandService.createOwnTask(request, chatId);
-        userStateService.clearTemp(chatId);
-        userStateService.clearState(chatId);
+        TaskCreateRequest request = super.finishFlow(chatId, TaskCreateRequest.class);
+        botService.createOwnTask(request, chatId);
+
     }
 
 }

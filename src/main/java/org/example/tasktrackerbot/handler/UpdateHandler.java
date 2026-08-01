@@ -5,7 +5,7 @@ import org.example.tasktrackerbot.commands.dispatcher.BotCommandDispatcher;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
-import org.example.tasktrackerbot.buttons.dispatcher.BotCallbackQueryDispatcher;
+import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;

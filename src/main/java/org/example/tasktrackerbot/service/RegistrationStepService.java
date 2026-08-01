@@ -1,6 +1,7 @@
 package org.example.tasktrackerbot.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.catalina.User;
 import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.session.StepHandler;
@@ -12,22 +13,16 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-public class RegistrationStepService implements StepHandlerProvider {
+public class RegistrationStepService extends AbstractStateService implements StepHandlerProvider {
 
-    private final BotService botCommandService;
-    private final MessageSender messageSender;
-    private final UserStateService userStateService;
-    private final ObjectMapper objectMapper;
-
-    public RegistrationStepService(BotService botCommandService, MessageSender messageSender, UserStateService userStateService, ObjectMapper objectMapper) {
-        this.botCommandService = botCommandService;
-        this.messageSender = messageSender;
-        this.userStateService = userStateService;
-        this.objectMapper = objectMapper;
+    public RegistrationStepService(BotService botService,
+                                   MessageSender messageSender,
+                                   UserStateService userStateService,
+                                   ObjectMapper objectMapper) {
+        super(botService, messageSender, userStateService, objectMapper);
     }
 
     public Map<UserState, StepHandler> getHandlers() {
-
         return Map.of(UserState.REGISTER_AWAITING_NAME, this::handleNameStep,
                 UserState.REGISTER_AWAITING_USERNAME, this::handleUsernameStep,
                 UserState.REGISTER_AWAITING_EMAIL, this::handleEmailStep,
@@ -35,44 +30,27 @@ public class RegistrationStepService implements StepHandlerProvider {
     }
 
     public void startRegistration(String chatId) {
-
-        if (userStateService.getState(chatId) != UserState.NONE) {
-            messageSender.sendMessage(chatId, "Предыдущий диалог отменён");
-        }
-
-        userStateService.clearState(chatId);
-        userStateService.clearTemp(chatId);
-        userStateService.setState(chatId, UserState.REGISTER_AWAITING_NAME);
-        messageSender.sendMessage(chatId, "Введите ваше имя: ");
-
+        super.start(chatId, UserState.REGISTER_AWAITING_NAME, "Введите ваше имя:");
     }
 
     public void handleNameStep(String chatId, String name) {
-        userStateService.setState(chatId, UserState.REGISTER_AWAITING_USERNAME);
-        userStateService.setTemp(chatId, "name", name);
-        messageSender.sendMessage(chatId, "Введите ваш username: ");
-
+        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_USERNAME, "name", name, "Введите ваш username: ");
     }
 
     public void handleUsernameStep(String chatId, String username) {
-        userStateService.setState(chatId, UserState.REGISTER_AWAITING_EMAIL);
-        userStateService.setTemp(chatId, "username", username);
-        messageSender.sendMessage(chatId, "Введите ваш email: ");
+        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_EMAIL, "username", username, "Введите ваш email: ");
     }
 
     public void handleEmailStep(String chatId, String email) {
-        userStateService.setState(chatId, UserState.REGISTER_AWAITING_PASSWORD);
-        userStateService.setTemp(chatId, "email", email);
-        messageSender.sendMessage(chatId, "Введите ваш пароль: ");
+        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_PASSWORD, "email", email, "Введите ваш пароль: ");
     }
 
     public void handlePasswordStep(String chatId, String password) {
+
         userStateService.setTemp(chatId, "password", password);
-        Map<Object, Object> map = userStateService.getAllTempFields(chatId);
-        UserRegisterRequest request = objectMapper.convertValue(map, UserRegisterRequest.class);
-        botCommandService.register(request.getName(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
-        userStateService.clearTemp(chatId);
-        userStateService.clearState(chatId);
+        UserRegisterRequest request = super.finishFlow(chatId, UserRegisterRequest.class);
+        botService.register(request.getName(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
+
     }
 
 }

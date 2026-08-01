@@ -53,10 +53,21 @@ public class BotService {
         Список доступных команд:
         /register
         /login
+        /menu
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
         messageSender.sendKeyboardMessage(chatId, message, authKeyboard.getKeyboard());
     }
+
+    public void mainMenu(String chatId) {
+
+        String message = """
+                Основное меню. Операции представлены ниже:
+                """;
+        messageSender.sendKeyboardMessage(chatId, message, mainMenuKeyboard.getKeyboard());
+
+    }
+
 
     public void register(String name, String username, String email, String password, String chatId) {
 
