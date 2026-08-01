@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.queries.dispatcher;
 
+import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.StepHandlerDispatcher;
@@ -31,6 +32,16 @@ public class BotCallbackQueryDispatcher {
     public void dispatchCallbackQuery(Update update, String chatId) {
         String query = update.getCallbackQuery().getData();
 
+
+        // Методы, которые не требуют авторизации. Проверяем, что пользователь НЕ авторизован.
+        if(query.equals("auth:login") ||  query.equals("auth:register")) {
+            if (botService.isAuthorized(chatId)) {
+                throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
+                        "Ошибка при нажатии на кнопку Query: " + query);
+            }
+            botFlowQueryMap.get(query).execute(chatId);
+            return;
+        }
         botService.authorizeByChatId(chatId);
 
         // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.

@@ -2,11 +2,13 @@ package org.example.tasktrackerbot.DTO.request.signable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LinkRequest implements Signable {
 
     private String provider;

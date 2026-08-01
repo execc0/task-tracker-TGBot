@@ -59,7 +59,7 @@ public class TaskTrackerApiClient {
 
 
         String token = taskTrackerRestClient.post()
-                .uri("/auth/register-and-link")
+                .uri("/auth/login-and-link")
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {

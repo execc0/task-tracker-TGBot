@@ -25,7 +25,7 @@ public class LoginStepService extends AbstractStateService implements StepHandle
     }
 
     public void startLogin(String chatId) {
-        super.start(chatId, UserState.LOGIN_AWAITING_USERNAME, "Введите ваше имя: ");
+        super.start(chatId, UserState.LOGIN_AWAITING_USERNAME, "Введите ваш username: ");
     }
 
     public void handleUsernameStep(String chatId, String username) {

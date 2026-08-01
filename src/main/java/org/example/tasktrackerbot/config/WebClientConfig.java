@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 
+import java.io.IOException;
+
 @Configuration
 public class WebClientConfig {
 
@@ -32,11 +34,11 @@ public class WebClientConfig {
                 .build();
     }
 
-    private void handleServerError(HttpRequest request, ClientHttpResponse response) {
+    private void handleServerError(HttpRequest request, ClientHttpResponse response) throws IOException {
 
-        ApiErrorResponse parsedResponse = objectMapper.convertValue(response, ApiErrorResponse.class);
+        ApiErrorResponse responseBody = objectMapper.readValue(response.getBody(), ApiErrorResponse.class);
 
-        String errorMessage = extractErrorMessage(parsedResponse);
+        String errorMessage = extractErrorMessage(responseBody);
 
         throw new ApiServerError("Внутрення ошибка сервера. Повторите попытку позже",
                 "Ошибка сервера при вызове API, URI: " + request.getURI() + " response: " + errorMessage);

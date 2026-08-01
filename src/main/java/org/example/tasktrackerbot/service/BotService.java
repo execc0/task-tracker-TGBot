@@ -32,6 +32,16 @@ public class BotService {
         this.mainMenuKeyboard = mainMenuKeyboard;
     }
 
+    public boolean isAuthorized(String chatId) {
+        boolean isAuthorized = true;
+        try {
+            authorizeByChatId(chatId);
+        } catch (Exception exception){
+            isAuthorized = false;
+        }
+        return isAuthorized;
+    }
+
     public void authorizeByChatId(String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {
