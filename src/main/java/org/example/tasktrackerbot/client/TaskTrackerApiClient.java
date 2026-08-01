@@ -8,6 +8,7 @@ import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.DTO.response.AuthResponse;
 import org.example.tasktrackerbot.exception.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
@@ -110,6 +111,24 @@ public class TaskTrackerApiClient {
                 )
                 .body(AuthResponse.class)
                 .getToken();
+
+    }
+
+    public void createOwnTask(TaskCreateRequest request, String token) {
+
+        taskTrackerRestClient.post()
+                .uri("tasks/my")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiUnlinkException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: createOwnTask, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .toBodilessEntity();
 
     }
 

@@ -1,0 +1,25 @@
+package org.example.tasktrackerbot.buttons;
+
+import org.example.tasktrackerbot.service.RegistrationStepService;
+import org.springframework.stereotype.Component;
+
+@Component
+public class RegisterCallbackQuery implements FlowCallbackQuery {
+
+    private final RegistrationStepService registrationStepService;
+
+    public RegisterCallbackQuery(RegistrationStepService registrationStepService) {
+        this.registrationStepService = registrationStepService;
+    }
+
+    @Override
+    public String getQuery() {
+        return "auth:register";
+    }
+
+    @Override
+    public void execute(String chatId) {
+        registrationStepService.startRegistration(chatId);
+    }
+
+}

@@ -22,6 +22,10 @@ public class GlobalExceptionHandler {
 
     public void handle(String chatId, Exception exception) {
 
+        if(chatId == null) {
+            handleGeneral(exception);
+            return;
+        }
         if (exception instanceof BotException botException) {
             log.error("BotException: {}, chatId: {}", botException.getInternalMessage(), chatId);
             messageSender.sendMessage(chatId, botException.getMessage());

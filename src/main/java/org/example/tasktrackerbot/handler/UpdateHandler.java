@@ -1,16 +1,12 @@
 package org.example.tasktrackerbot.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.commands.BotCommand;
 import org.example.tasktrackerbot.commands.dispatcher.BotCommandDispatcher;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
-import org.example.tasktrackerbot.queries.CallbackQuery;
-import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
-import org.example.tasktrackerbot.session.StepHandler;
-import org.example.tasktrackerbot.session.UserState;
-import org.example.tasktrackerbot.session.UserStateService;
+import org.example.tasktrackerbot.buttons.dispatcher.BotCallbackQueryDispatcher;
+import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,7 +14,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 
 import java.util.List;
-import java.util.Map;
 
 
 @Component
@@ -29,18 +24,18 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     private final GlobalExceptionHandler exceptionHandler;
     private final BotCommandDispatcher commandDispatcher;
     private final UserStateService userStateService;
-    private final Map<UserState, StepHandler> registrationHandlerMap;
+    private final StepHandlerDispatcher stepHandlerDispatcher;
 
     public UpdateHandler(GlobalExceptionHandler exceptionHandler,
                          BotCommandDispatcher commandDispatcher,
                          BotCallbackQueryDispatcher callbackQueryDispatcher,
                          UserStateService userStateService,
-                         Map<UserState, StepHandler> registrationHandlerMap) {
+                         StepHandlerDispatcher stepHandlerDispatcher) {
         this.callbackQueryDispatcher = callbackQueryDispatcher;
         this.exceptionHandler = exceptionHandler;
         this.commandDispatcher = commandDispatcher;
         this.userStateService = userStateService;
-        this.registrationHandlerMap = registrationHandlerMap;
+        this.stepHandlerDispatcher = stepHandlerDispatcher;
     }
 
     @Override
@@ -51,12 +46,11 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     @Override
     public void consume(Update update) {
 
-        String chatId = extractChatId(update);
-        if (chatId == null) {
-            return;
-        }
+        String chatId = null;
 
         try {
+
+            chatId = extractChatId(update);
 
             // Callback - обработка нажатий на кнопки
             if (update.getCallbackQuery() != null) {
@@ -73,7 +67,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
             // State - обработка ввода после нажатия на кнопку
             if(userStateService.getState(chatId) != UserState.NONE) {
-                registrationHandlerMap.get(userStateService.getState(chatId)).handle(chatId, update.getMessage().getText());
+                stepHandlerDispatcher.dispatchStateInput(update.getMessage().getText(), chatId);
                 return;
             }
 
@@ -95,8 +89,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getMessage().getChatId().toString();
         }
-        exceptionHandler.handleGeneral(new NullMessageException("Ошибка! Сообщение отсутствует"));
-        return null;
+        throw new NullMessageException("Ошибка! Сообщение отсутствует");
     }
 
 

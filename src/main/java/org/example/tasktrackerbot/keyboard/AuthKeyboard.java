@@ -7,9 +7,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 
 @Component
-public class AuthKeyboard {
+public class AuthKeyboard implements Keyboard {
 
-    public InlineKeyboardMarkup authMenu() {
+    public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton loginButton = InlineKeyboardButton.builder()
                 .text("Вход")

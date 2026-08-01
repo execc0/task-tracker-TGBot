@@ -1,36 +1,32 @@
 package org.example.tasktrackerbot.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.session.StepHandler;
+import org.example.tasktrackerbot.session.StepHandlerProvider;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class RegistrationService {
+public class RegistrationStepService implements StepHandlerProvider {
 
     private final BotService botCommandService;
     private final MessageSender messageSender;
     private final UserStateService userStateService;
     private final ObjectMapper objectMapper;
 
-    public RegistrationService(BotService botCommandService, MessageSender messageSender, UserStateService userStateService, ObjectMapper objectMapper) {
+    public RegistrationStepService(BotService botCommandService, MessageSender messageSender, UserStateService userStateService, ObjectMapper objectMapper) {
         this.botCommandService = botCommandService;
         this.messageSender = messageSender;
         this.userStateService = userStateService;
         this.objectMapper = objectMapper;
     }
 
-    @Bean(name = "registrationHandlerMap")
-    @PostConstruct
-    public Map<UserState, StepHandler> createRegistrationHandlerMap() {
+    public Map<UserState, StepHandler> getHandlers() {
 
         return Map.of(UserState.REGISTER_AWAITING_NAME, this::handleNameStep,
                 UserState.REGISTER_AWAITING_USERNAME, this::handleUsernameStep,

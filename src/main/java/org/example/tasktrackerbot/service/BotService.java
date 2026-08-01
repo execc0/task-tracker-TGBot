@@ -7,6 +7,7 @@ import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
 import org.example.tasktrackerbot.keyboard.AuthKeyboard;
+import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
 import org.example.tasktrackerbot.session.TokenHandlerService;
@@ -20,13 +21,15 @@ public class BotService {
     private final SignatureService signatureService;
     private final TokenHandlerService tokenHandlerService;
     private final AuthKeyboard authKeyboard;
+    private final MainMenuKeyboard mainMenuKeyboard;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
         this.tokenHandlerService = tokenHandlerService;
         this.authKeyboard = authKeyboard;
+        this.mainMenuKeyboard = mainMenuKeyboard;
     }
 
     public void authorizeByChatId(String chatId) {
@@ -52,7 +55,7 @@ public class BotService {
         /login
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
-        messageSender.sendKeyboardMessage(chatId, message, authKeyboard.authMenu());
+        messageSender.sendKeyboardMessage(chatId, message, authKeyboard.getKeyboard());
     }
 
     public void register(String name, String username, String email, String password, String chatId) {
@@ -73,6 +76,17 @@ public class BotService {
 
 
         messageSender.sendMessage(chatId, "Регистрация прошла успешно");
+        messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
+
+    }
+
+    public void createOwnTask(TaskCreateRequest request, String chatId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        taskTrackerApiClient.createOwnTask(request, token);
+
+        messageSender.sendMessage(chatId, String.format("Задача с названием %s успешно создана", request.getTitle()));
 
     }
 
@@ -95,6 +109,7 @@ public class BotService {
         tokenHandlerService.saveToken(chatId, token);
 
         messageSender.sendMessage(chatId, "Авторизация прошла успешно");
+        messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
 
     }
 
