@@ -50,7 +50,7 @@ public class BotCallbackQueryDispatcher {
             return;
         }
 
-        // Иначе: операция связана с вводом состояния, передаем в stepHandler
+        // Иначе: операция связана с вводом состояния, передаем в stepHandlerDispatcher
         String value = query.split(":")[1];
         stepHandlerDispatcher.dispatchStateInput(value, chatId);
 

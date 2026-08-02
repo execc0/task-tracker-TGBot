@@ -6,6 +6,8 @@ import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
 import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
+import org.example.tasktrackerbot.exception.ApiLoginException;
+import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.keyboard.AuthKeyboard;
 import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
@@ -36,7 +38,7 @@ public class BotService {
         boolean isAuthorized = true;
         try {
             authorizeByChatId(chatId);
-        } catch (Exception exception){
+        } catch (ApiLoginException exception){
             isAuthorized = false;
         }
         return isAuthorized;
@@ -111,11 +113,11 @@ public class BotService {
 
     }
 
-    public void login(String username, String password, String chatId) {
+    public Integer login(String username, String password, String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {
-            messageSender.sendMessage(chatId, "Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink");
-            return;
+            throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
+                    "Ошибка при вызове метода login, пользователь уже авторизован chatId: " + chatId);
         }
 
         UserLoginRequest userLoginRequest = new UserLoginRequest(username, password);
@@ -129,8 +131,9 @@ public class BotService {
 
         tokenHandlerService.saveToken(chatId, token);
 
-        messageSender.sendMessage(chatId, "Авторизация прошла успешно");
+        Integer toDeleteId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
         messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
+        return toDeleteId;
 
     }
 

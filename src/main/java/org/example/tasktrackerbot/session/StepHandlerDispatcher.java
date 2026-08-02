@@ -4,6 +4,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * Класс, который отвечает за нахождение обработчика сообщений, завязанных на состоянии.
+ */
 @Component
 public class StepHandlerDispatcher {
 

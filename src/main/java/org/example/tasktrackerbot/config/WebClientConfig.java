@@ -40,7 +40,7 @@ public class WebClientConfig {
 
         String errorMessage = extractErrorMessage(responseBody);
 
-        throw new ApiServerError("Внутрення ошибка сервера. Повторите попытку позже",
+        throw new ApiServerError("Внутренняя ошибка сервера. Повторите попытку позже",
                 "Ошибка сервера при вызове API, URI: " + request.getURI() + " response: " + errorMessage);
 
     }

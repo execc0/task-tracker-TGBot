@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Dispatcher, который отвечает за нахождение нужного обработчика для команд
+ * Команды начинаются с "/" и обрабатываются полностью за один раз без промежуточных состояний
+ */
 @Component
 public class BotCommandDispatcher {
 
@@ -24,10 +28,15 @@ public class BotCommandDispatcher {
 
     public void dispatchCommand(Update update, String command, String chatId) {
 
-        if(!command.equals("/login") && !command.equals("/register") && !command.equals("/start")) {
-            botService.authorizeByChatId(chatId);
+        // Команды для которых авторизация НЕ требуется
+        if(command.equals("/login") || command.equals("/register") || command.equals("/start")) {
+            botCommandMap.get(command).execute(update);
+            return;
         }
 
+        botService.authorizeByChatId(chatId);
+
+        // Остальные команды - после авторизации
         if (!botCommandMap.containsKey(command)) {
             throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + command
                     + "\nДля начала работы введите /start");

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.catalina.User;
 import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.example.tasktrackerbot.session.StepHandler;
-import org.example.tasktrackerbot.session.StepHandlerProvider;
-import org.example.tasktrackerbot.session.UserState;
-import org.example.tasktrackerbot.session.UserStateService;
+import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,8 +15,9 @@ public class RegistrationStepService extends AbstractStateService implements Ste
     public RegistrationStepService(BotService botService,
                                    MessageSender messageSender,
                                    UserStateService userStateService,
-                                   ObjectMapper objectMapper) {
-        super(botService, messageSender, userStateService, objectMapper);
+                                   ObjectMapper objectMapper,
+                                   MessageDeleteScheduler messageDeleteScheduler) {
+        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler);
     }
 
     public Map<UserState, StepHandler> getHandlers() {

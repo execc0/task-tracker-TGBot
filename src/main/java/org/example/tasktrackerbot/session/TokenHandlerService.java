@@ -8,7 +8,7 @@ import java.time.Duration;
 
 
 /**
- * Класс для сохранения JWT токенов в бд Redis
+ * Класс для хранения JWT токенов в бд Redis
  */
 @Service
 @Slf4j

@@ -1,8 +1,13 @@
 package org.example.tasktrackerbot.responder;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.tasktrackerbot.exception.BotException;
+import org.example.tasktrackerbot.exception.FailToExecuteException;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -17,38 +22,94 @@ public class MessageSender {
         this.telegramClient = telegramClient;
     }
 
-    public void sendMessage(String chatId, String message) {
+    public Integer sendMessage(String chatId, String message) {
 
         SendMessage sendMessage = new SendMessage(chatId, message);
 
-        execute(sendMessage, chatId);
+        return execute(sendMessage, chatId);
 
     }
 
-    public void sendKeyboardMessage(String chatId, String message, InlineKeyboardMarkup markup) {
+    public Integer sendKeyboardMessage(String chatId, String message, InlineKeyboardMarkup markup) {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
                 .text(message)
                 .replyMarkup(markup)
                 .build();
-        execute(sendMessage, chatId);
+        return execute(sendMessage, chatId);
     }
 
-    public void sendMessageDefault(String chatId) {
+    public Integer sendMessageDefault(String chatId) {
         String text = """
                 Ошибка! Введена неверная команда.
                 Для начала работы с ботом введите:
                 /start
                 """;
-        sendMessage(chatId, text);
+        return sendMessage(chatId, text);
     }
 
-    private void execute(SendMessage sendMessage, String chatId) {
+    public void deleteMessage(String chatId, String messageId) {
+
+        DeleteMessage deleteMessage = DeleteMessage.builder()
+                .chatId(chatId)
+                .messageId(Integer.parseInt(messageId))
+                .build();
+
+        execute(deleteMessage, chatId);
+
+    }
+
+    public Integer editMessage(String chatId, String messageId, String message) {
+
+        EditMessageText editMessage = EditMessageText.builder()
+                .chatId(chatId)
+                .messageId(Integer.parseInt(messageId))
+                .text(message)
+                .build();
+
+        return execute(editMessage, chatId);
+
+    }
+
+    public Integer editMessage(String chatId, String messageId, String message, InlineKeyboardMarkup keyboard) {
+
+        EditMessageText editMessage = EditMessageText.builder()
+                .chatId(chatId)
+                .messageId(Integer.parseInt(messageId))
+                .replyMarkup(keyboard)
+                .text(message)
+                .build();
+
+        return execute(editMessage, chatId);
+
+    }
+
+    private Integer execute(SendMessage sendMessage, String chatId) {
         try {
-            telegramClient.execute(sendMessage);
-            log.info("Сообщение успешно отправлено, chatId: {}", chatId);
+            Message sent = telegramClient.execute(sendMessage);
+            log.info("Сообщение успешно отправлено, chatId: {}, messageId: {}", chatId, sent.getMessageId());
+            return sent.getMessageId();
         } catch (TelegramApiException e) {
-            log.error("Ошибка! Сообщение не было отправлено: {}", e.getMessage());
+            throw new FailToExecuteException("Не удалось отправить сообщение: " + e.getMessage());
+        }
+    }
+
+    private void execute(DeleteMessage deleteMessage, String chatId) {
+        try {
+            telegramClient.execute(deleteMessage);
+            log.info("Сообщение успешно удалено, chatId: {}", chatId);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка! Сообщение не было удалено: {}", e.getMessage());
+        }
+    }
+
+    private Integer execute(EditMessageText editMessageText, String chatId) {
+        try {
+            telegramClient.execute(editMessageText);
+            log.info("Сообщение успешно отредактировано, chatId: {}, messageId: {}", chatId, editMessageText.getMessageId());
+            return editMessageText.getMessageId();
+        } catch (TelegramApiException e) {
+            throw new FailToExecuteException("Не удалось отредактировать сообщение: " + e.getMessage());
         }
     }
 }

@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
             return;
         }
         if (exception instanceof BotException botException) {
-            log.error("BotException: {}, chatId: {}", botException.getInternalMessage(), chatId);
+            log.error("BotException: {}, chatId: {}", botException.getInternalMessage(), chatId, botException);
             messageSender.sendMessage(chatId, botException.getMessage());
             return;
         }
@@ -36,6 +36,6 @@ public class GlobalExceptionHandler {
     }
 
     public void handleGeneral(Exception exception) {
-        log.error("Возникло исключение: {}, message: {}", exception.getClass().getSimpleName(), exception.getMessage());
+        log.error("Возникло исключение: {}, message: {}", exception.getClass().getSimpleName(), exception.getMessage(), exception);
     }
 }

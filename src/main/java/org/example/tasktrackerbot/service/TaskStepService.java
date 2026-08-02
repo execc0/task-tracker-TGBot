@@ -7,10 +7,7 @@ import org.example.tasktrackerbot.DTO.request.TaskCreateRequest;
 import org.example.tasktrackerbot.keyboard.TaskPriorityKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskStatusKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.example.tasktrackerbot.session.StepHandler;
-import org.example.tasktrackerbot.session.StepHandlerProvider;
-import org.example.tasktrackerbot.session.UserState;
-import org.example.tasktrackerbot.session.UserStateService;
+import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +23,10 @@ public class TaskStepService extends AbstractStateService implements StepHandler
     public TaskStepService(BotService botService,
                            MessageSender messageSender,
                            UserStateService userStateService,
-                           ObjectMapper objectMapper, TaskPriorityKeyboard taskPriorityKeyboard, TaskStatusKeyboard taskStatusKeyboard) {
-        super(botService, messageSender, userStateService, objectMapper);
+                           ObjectMapper objectMapper, TaskPriorityKeyboard taskPriorityKeyboard,
+                           TaskStatusKeyboard taskStatusKeyboard,
+                           MessageDeleteScheduler messageDeleteScheduler) {
+        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler);
         this.taskPriorityKeyboard = taskPriorityKeyboard;
         this.taskStatusKeyboard = taskStatusKeyboard;
     }

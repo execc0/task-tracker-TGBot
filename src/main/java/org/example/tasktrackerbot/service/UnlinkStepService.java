@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.request.UnlinkSocialRequest;
 import org.example.tasktrackerbot.DTO.request.UserLoginRequest;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.example.tasktrackerbot.session.StepHandler;
-import org.example.tasktrackerbot.session.StepHandlerProvider;
-import org.example.tasktrackerbot.session.UserState;
-import org.example.tasktrackerbot.session.UserStateService;
+import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -16,8 +13,8 @@ import java.util.Map;
 public class UnlinkStepService extends AbstractStateService implements StepHandlerProvider {
 
     public UnlinkStepService(UserStateService userStateService, MessageSender messageSender,
-                             ObjectMapper objectMapper, BotService botService) {
-        super(botService, messageSender, userStateService, objectMapper);
+                             ObjectMapper objectMapper, BotService botService, MessageDeleteScheduler messageDeleteScheduler) {
+        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler);
     }
 
     @Override
