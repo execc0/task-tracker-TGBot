@@ -67,7 +67,7 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
             // State - обработка ввода после нажатия на кнопку
             if(userStateService.getState(chatId) != UserState.NONE) {
-                stepHandlerDispatcher.dispatchStateInput(update.getMessage().getText(), chatId);
+                stepHandlerDispatcher.dispatchStateInput(update.getMessage().getText(), chatId, update.getMessage().getMessageId());
                 return;
             }
 

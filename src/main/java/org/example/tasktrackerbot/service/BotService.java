@@ -137,7 +137,7 @@ public class BotService {
 
     }
 
-    public void unlink(String username, String password, String chatId) {
+    public Integer unlink(String username, String password, String chatId) {
 
         UnlinkSocialRequest unlinkSocialRequest = new UnlinkSocialRequest(username, password, "Telegram", chatId);
 
@@ -147,7 +147,7 @@ public class BotService {
 
         tokenHandlerService.deleteToken(chatId); // на случай ре-авторизации
 
-        messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
+        return messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
 
 
     }

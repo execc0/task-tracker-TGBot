@@ -26,19 +26,21 @@ public class LoginStepService extends AbstractStateService implements StepHandle
     }
 
     public void startLogin(String chatId) {
-        super.start(chatId, UserState.LOGIN_AWAITING_USERNAME, "Шаг 1/2 \nВведите ваш username: ");
+        super.start(chatId, UserState.LOGIN_AWAITING_USERNAME, "Введите ваш username: ");
     }
 
-    public void handleUsernameStep(String chatId, String username) {
-        super.handleNextStep(chatId, UserState.LOGIN_AWAITING_PASSWORD, "username", username, "Шаг 2/2 \nВведите пароль: ");
+    public void handleUsernameStep(String chatId, String username, Integer messageId) {
+        super.handleNextStep(chatId, messageId, UserState.LOGIN_AWAITING_PASSWORD, "username", username, "Введите пароль: ");
+        super.deleteUserMessage(chatId, messageId);
     }
 
-    public void handlePasswordStep(String chatId, String password) {
+    public void handlePasswordStep(String chatId, String password, Integer messageId) {
 
         userStateService.setTemp(chatId, "password", password);
-        UserLoginRequest request = super.finishFlow(chatId, UserLoginRequest.class);
-        Integer toDeleteId = botService.login(request.getUsername(), request.getPassword(), chatId);
-        super.scheduleMessageDelete(chatId, toDeleteId.toString());
+        UserLoginRequest request = super.finishFlow(chatId, messageId, UserLoginRequest.class);
+        Integer botMessageId = botService.login(request.getUsername(), request.getPassword(), chatId);
+        super.scheduleMessageDelete(chatId, botMessageId.toString());
+        super.deleteUserMessage(chatId, messageId);
 
     }
 

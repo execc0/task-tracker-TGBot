@@ -31,22 +31,25 @@ public class RegistrationStepService extends AbstractStateService implements Ste
         super.start(chatId, UserState.REGISTER_AWAITING_NAME, "Введите ваше имя:");
     }
 
-    public void handleNameStep(String chatId, String name) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_USERNAME, "name", name, "Введите ваш username: ");
+    public void handleNameStep(String chatId, String name, Integer messageId) {
+        super.handleNextStep(chatId, messageId, UserState.REGISTER_AWAITING_USERNAME, "name", name, "Введите ваш username: ");
+        super.deleteUserMessage(chatId, messageId);
     }
 
-    public void handleUsernameStep(String chatId, String username) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_EMAIL, "username", username, "Введите ваш email: ");
+    public void handleUsernameStep(String chatId, String username, Integer messageId) {
+        super.handleNextStep(chatId, messageId, UserState.REGISTER_AWAITING_EMAIL, "username", username, "Введите ваш email: ");
+        super.deleteUserMessage(chatId, messageId);
     }
 
-    public void handleEmailStep(String chatId, String email) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_PASSWORD, "email", email, "Введите ваш пароль: ");
+    public void handleEmailStep(String chatId, String email, Integer messageId) {
+        super.handleNextStep(chatId, messageId, UserState.REGISTER_AWAITING_PASSWORD, "email", email, "Введите ваш пароль: ");
+        super.deleteUserMessage(chatId, messageId);
     }
 
-    public void handlePasswordStep(String chatId, String password) {
+    public void handlePasswordStep(String chatId, String password, Integer messageId) {
 
         userStateService.setTemp(chatId, "password", password);
-        UserRegisterRequest request = super.finishFlow(chatId, UserRegisterRequest.class);
+        UserRegisterRequest request = super.finishFlow(chatId, messageId, UserRegisterRequest.class);
         botService.register(request.getName(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
 
     }

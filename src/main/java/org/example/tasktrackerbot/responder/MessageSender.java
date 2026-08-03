@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.exception.BotException;
 import org.example.tasktrackerbot.exception.FailToExecuteException;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -84,6 +85,24 @@ public class MessageSender {
 
     }
 
+    public void answerCallback(String callBackQueryId) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callBackQueryId)
+                .build();
+
+        execute(answerCallbackQuery);
+    }
+
+    public void answerCallback(String callBackQueryId, String text) {
+        AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
+                .callbackQueryId(callBackQueryId)
+                .text(text)
+                .showAlert(false)
+                .build();
+
+        execute(answerCallbackQuery);
+    }
+
     private Integer execute(SendMessage sendMessage, String chatId) {
         try {
             Message sent = telegramClient.execute(sendMessage);
@@ -91,6 +110,15 @@ public class MessageSender {
             return sent.getMessageId();
         } catch (TelegramApiException e) {
             throw new FailToExecuteException("Не удалось отправить сообщение: " + e.getMessage());
+        }
+    }
+
+    private void execute(AnswerCallbackQuery answerCallbackQuery) {
+        try {
+            telegramClient.execute(answerCallbackQuery);
+            log.info("Ответ на нажатие кнопки отправлен, callbackId: {}", answerCallbackQuery.getCallbackQueryId());
+        } catch (TelegramApiException e) {
+            throw new FailToExecuteException("Не удалось погасить кнопку " + e.getMessage());
         }
     }
 

@@ -18,12 +18,12 @@ public class StepHandlerDispatcher {
         this.userStateService = userStateService;
     }
 
-    public void dispatchStateInput(String input, String chatId) {
+    public void dispatchStateInput(String input, String chatId, Integer messageId) {
         UserState currentState = userStateService.getState(chatId);
         if (!stepHandlersMap.containsKey(currentState)) {
             throw new RuntimeException(String.format("Не найден нужный обработчик состояния для состояния: %s input: %s", currentState, input));
         }
-        stepHandlersMap.get(currentState).handle(chatId, input);
+        stepHandlersMap.get(currentState).handle(chatId, input, messageId);
     }
 
 }

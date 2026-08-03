@@ -2,6 +2,7 @@ package org.example.tasktrackerbot.queries.dispatcher;
 
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
+import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
@@ -21,16 +22,19 @@ public class BotCallbackQueryDispatcher {
     private final Map<String, FlowCallbackQuery> botFlowQueryMap;
     private final StepHandlerDispatcher stepHandlerDispatcher;
     private final BotService botService;
+    private final MessageSender messageSender;
 
-    public BotCallbackQueryDispatcher(List<FlowCallbackQuery> flowQueryList, StepHandlerDispatcher stepHandlerDispatcher, BotService botService) {
+    public BotCallbackQueryDispatcher(List<FlowCallbackQuery> flowQueryList, StepHandlerDispatcher stepHandlerDispatcher, BotService botService, MessageSender messageSender) {
         botFlowQueryMap = flowQueryList.stream()
                 .collect(Collectors.toMap(query -> query.getQuery(), query -> query));
         this.stepHandlerDispatcher = stepHandlerDispatcher;
         this.botService = botService;
+        this.messageSender = messageSender;
     }
 
     public void dispatchCallbackQuery(Update update, String chatId) {
         String query = update.getCallbackQuery().getData();
+        String callBackQueryId = update.getCallbackQuery().getId();
 
 
         // Методы, которые не требуют авторизации. Проверяем, что пользователь НЕ авторизован.
@@ -40,6 +44,7 @@ public class BotCallbackQueryDispatcher {
                         "Ошибка при нажатии на кнопку Query: " + query);
             }
             botFlowQueryMap.get(query).execute(chatId);
+            messageSender.answerCallback(callBackQueryId, "Принято!");
             return;
         }
         botService.authorizeByChatId(chatId);
@@ -47,12 +52,14 @@ public class BotCallbackQueryDispatcher {
         // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.
         if (botFlowQueryMap.containsKey(query)) {
             botFlowQueryMap.get(query).execute(chatId);
+            messageSender.answerCallback(callBackQueryId);
             return;
         }
 
         // Иначе: операция связана с вводом состояния, передаем в stepHandlerDispatcher
         String value = query.split(":")[1];
-        stepHandlerDispatcher.dispatchStateInput(value, chatId);
+        stepHandlerDispatcher.dispatchStateInput(value, chatId, null);
+        messageSender.answerCallback(callBackQueryId, "Принято!");
 
     }
 
