@@ -12,6 +12,7 @@ import org.example.tasktrackerbot.keyboard.AuthKeyboard;
 import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
+import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.example.tasktrackerbot.session.TokenHandlerService;
 import org.springframework.stereotype.Component;
 
@@ -24,25 +25,18 @@ public class BotService {
     private final TokenHandlerService tokenHandlerService;
     private final AuthKeyboard authKeyboard;
     private final MainMenuKeyboard mainMenuKeyboard;
+    private final MessageDeleteScheduler messageDeleteScheduler;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard, MessageDeleteScheduler messageDeleteScheduler) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
         this.tokenHandlerService = tokenHandlerService;
         this.authKeyboard = authKeyboard;
         this.mainMenuKeyboard = mainMenuKeyboard;
+        this.messageDeleteScheduler = messageDeleteScheduler;
     }
 
-    public boolean isAuthorized(String chatId) {
-        boolean isAuthorized = true;
-        try {
-            authorizeByChatId(chatId);
-        } catch (ApiLoginException exception){
-            isAuthorized = false;
-        }
-        return isAuthorized;
-    }
 
     public void authorizeByChatId(String chatId) {
 
@@ -84,8 +78,8 @@ public class BotService {
     public void register(String name, String username, String email, String password, String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {
-            messageSender.sendMessage(chatId, "Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink");
-            return;
+            throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
+                    "Ошибка при вызове метода login, пользователь уже авторизован chatId: " + chatId);
         }
 
         UserRegisterRequest registerRequest = new UserRegisterRequest(name, username, email, password);
@@ -98,8 +92,10 @@ public class BotService {
         tokenHandlerService.saveToken(chatId, token);
 
 
-        messageSender.sendMessage(chatId, "Регистрация прошла успешно");
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Регистрация прошла успешно");
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
         messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
+
 
     }
 
@@ -109,11 +105,14 @@ public class BotService {
 
         taskTrackerApiClient.createOwnTask(request, token);
 
-        messageSender.sendMessage(chatId, String.format("Задача с названием %s успешно создана", request.getTitle()));
+        Integer sentMessageId = messageSender.sendMessage(chatId, String.format("Задача с названием %s успешно создана",
+                request.getTitle()));
+
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 
     }
 
-    public Integer login(String username, String password, String chatId) {
+    public void login(String username, String password, String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {
             throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
@@ -131,13 +130,14 @@ public class BotService {
 
         tokenHandlerService.saveToken(chatId, token);
 
-        Integer toDeleteId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
         messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
-        return toDeleteId;
+
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 
     }
 
-    public Integer unlink(String username, String password, String chatId) {
+    public void unlink(String username, String password, String chatId) {
 
         UnlinkSocialRequest unlinkSocialRequest = new UnlinkSocialRequest(username, password, "Telegram", chatId);
 
@@ -147,7 +147,9 @@ public class BotService {
 
         tokenHandlerService.deleteToken(chatId); // на случай ре-авторизации
 
-        return messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
+
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 
 
     }

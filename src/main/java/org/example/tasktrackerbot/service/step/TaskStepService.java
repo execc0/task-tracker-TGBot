@@ -1,14 +1,12 @@
-package org.example.tasktrackerbot.service;
+package org.example.tasktrackerbot.service.step;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.tasktrackerbot.DTO.request.Priority;
-import org.example.tasktrackerbot.DTO.request.Status;
 import org.example.tasktrackerbot.DTO.request.TaskCreateRequest;
 import org.example.tasktrackerbot.keyboard.TaskPriorityKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskStatusKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.*;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -48,7 +46,6 @@ public class TaskStepService extends AbstractStateService implements StepHandler
     public void handleTitleStep(String chatId, String title, Integer messageId) {
 
         super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_DESCRIPTION, "title", title, "Введите описание задачи: ");
-        super.deleteUserMessage(chatId, messageId);
 
     }
 
@@ -56,7 +53,6 @@ public class TaskStepService extends AbstractStateService implements StepHandler
 
         super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_PRIORITY, "description",
                 description, "Выберите приоритет задачи: ",taskPriorityKeyboard.getKeyboard());
-        super.deleteUserMessage(chatId, messageId);
 
     }
 
@@ -64,7 +60,6 @@ public class TaskStepService extends AbstractStateService implements StepHandler
 
         super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_STATUS, "priority",
                 priority, "Выберите статус задачи: ", taskStatusKeyboard.getKeyboard());
-        super.deleteUserMessage(chatId, messageId);
 
     }
 
@@ -73,7 +68,7 @@ public class TaskStepService extends AbstractStateService implements StepHandler
         userStateService.setTemp(chatId, "status", status);
         TaskCreateRequest request = super.finishFlow(chatId, messageId, TaskCreateRequest.class);
         botService.createOwnTask(request, chatId);
-        super.deleteUserMessage(chatId, messageId);
+
 
 
     }

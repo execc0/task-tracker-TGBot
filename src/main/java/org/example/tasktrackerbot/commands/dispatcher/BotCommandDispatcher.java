@@ -18,25 +18,14 @@ import java.util.stream.Collectors;
 public class BotCommandDispatcher {
 
     private final Map<String, BotCommand> botCommandMap;
-    private final BotService botService;
 
-    public BotCommandDispatcher(List<BotCommand> botCommandList, BotService botService) {
+    public BotCommandDispatcher(List<BotCommand> botCommandList) {
         botCommandMap = botCommandList.stream()
                 .collect(Collectors.toMap(botCommand -> botCommand.getCommand(), botCommand -> botCommand));
-        this.botService = botService;
     }
 
     public void dispatchCommand(Update update, String command, String chatId) {
 
-        // Команды для которых авторизация НЕ требуется
-        if(command.equals("/login") || command.equals("/register") || command.equals("/start")) {
-            botCommandMap.get(command).execute(update);
-            return;
-        }
-
-        botService.authorizeByChatId(chatId);
-
-        // Остальные команды - после авторизации
         if (!botCommandMap.containsKey(command)) {
             throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + command
                     + "\nДля начала работы введите /start");

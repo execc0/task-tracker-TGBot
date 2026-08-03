@@ -4,7 +4,7 @@ import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
-import org.example.tasktrackerbot.session.StepHandlerDispatcher;
+import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -35,19 +35,6 @@ public class BotCallbackQueryDispatcher {
     public void dispatchCallbackQuery(Update update, String chatId) {
         String query = update.getCallbackQuery().getData();
         String callBackQueryId = update.getCallbackQuery().getId();
-
-
-        // Методы, которые не требуют авторизации. Проверяем, что пользователь НЕ авторизован.
-        if(query.equals("auth:login") ||  query.equals("auth:register")) {
-            if (botService.isAuthorized(chatId)) {
-                throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
-                        "Ошибка при нажатии на кнопку Query: " + query);
-            }
-            botFlowQueryMap.get(query).execute(chatId);
-            messageSender.answerCallback(callBackQueryId, "Принято!");
-            return;
-        }
-        botService.authorizeByChatId(chatId);
 
         // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.
         if (botFlowQueryMap.containsKey(query)) {

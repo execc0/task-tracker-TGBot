@@ -1,8 +1,8 @@
-package org.example.tasktrackerbot.service;
+package org.example.tasktrackerbot.service.step;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.tasktrackerbot.DTO.request.UserRegisterRequest;
 import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;

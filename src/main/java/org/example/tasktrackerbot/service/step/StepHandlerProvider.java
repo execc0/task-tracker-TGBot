@@ -1,4 +1,6 @@
-package org.example.tasktrackerbot.session;
+package org.example.tasktrackerbot.service.step;
+
+import org.example.tasktrackerbot.session.UserState;
 
 import java.util.Map;
 

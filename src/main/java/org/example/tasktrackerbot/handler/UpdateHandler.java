@@ -6,7 +6,9 @@ import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
+import org.example.tasktrackerbot.service.AuthorizationService;
 import org.example.tasktrackerbot.session.*;
+import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -25,17 +27,19 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     private final BotCommandDispatcher commandDispatcher;
     private final UserStateService userStateService;
     private final StepHandlerDispatcher stepHandlerDispatcher;
+    private final AuthorizationService authorizationService;
 
     public UpdateHandler(GlobalExceptionHandler exceptionHandler,
                          BotCommandDispatcher commandDispatcher,
                          BotCallbackQueryDispatcher callbackQueryDispatcher,
                          UserStateService userStateService,
-                         StepHandlerDispatcher stepHandlerDispatcher) {
+                         StepHandlerDispatcher stepHandlerDispatcher, AuthorizationService authorizationService) {
         this.callbackQueryDispatcher = callbackQueryDispatcher;
         this.exceptionHandler = exceptionHandler;
         this.commandDispatcher = commandDispatcher;
         this.userStateService = userStateService;
         this.stepHandlerDispatcher = stepHandlerDispatcher;
+        this.authorizationService = authorizationService;
     }
 
     @Override
@@ -52,8 +56,10 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
             chatId = extractChatId(update);
 
+            authorizationService.authorize(update, chatId);
+
             // Callback - обработка нажатий на кнопки
-            if (update.getCallbackQuery() != null) {
+            if (update.hasCallbackQuery()) {
                 callbackQueryDispatcher.dispatchCallbackQuery(update, chatId);
                 return;
             }
