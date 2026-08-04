@@ -8,6 +8,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @Component
 public class MainMenuKeyboard implements Keyboard {
 
+    public KeyboardType getKeyboardType() {
+        return KeyboardType.MAIN_MENU;
+    }
+
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton createTaskButton = InlineKeyboardButton.builder()
@@ -20,8 +24,14 @@ public class MainMenuKeyboard implements Keyboard {
                 .callbackData("task:get")
                 .build();
 
+        InlineKeyboardButton returnToAuthButton = InlineKeyboardButton.builder()
+                .text("Назад")
+                .callbackData("menu:start")
+                .build();
+
+
         return InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(createTaskButton, getOwnTasksButton))
+                .keyboardRow(new InlineKeyboardRow(returnToAuthButton, createTaskButton, getOwnTasksButton))
                 .build();
 
     }

@@ -1,15 +1,15 @@
 package org.example.tasktrackerbot.queries.flow;
 
-import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GetMainMenuQuery implements  FlowCallbackQuery {
 
-    private final BotService botService;
+    private final NavigationService navigationService;
 
-    public GetMainMenuQuery(BotService botService) {
-        this.botService = botService;
+    public GetMainMenuQuery(NavigationService navigationService) {
+        this.navigationService = navigationService;
     }
 
     @Override
@@ -19,6 +19,6 @@ public class GetMainMenuQuery implements  FlowCallbackQuery {
 
     @Override
     public void execute(String chatId) {
-        botService.mainMenu(chatId);
+        navigationService.mainMenu(chatId);
     }
 }

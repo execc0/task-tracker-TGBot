@@ -5,6 +5,7 @@ import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Set;
@@ -15,6 +16,7 @@ public class AuthorizationService {
     private final BotService botService;
     private final UserStateService userStateService;
     private static final Set<String> QUERIES_REQUIRE_NO_AUTH = Set.of("auth:login", "auth:register");
+    private static final Set<String> QUERIES_NEED_NO_AUTH = Set.of( "state:cancel", "state:return");
     private static final Set<String> COMMANDS_REQUIRE_NO_AUTH = Set.of("/login", "/register");
     private static final Set<UserState> STATES_NEED_NO_AUTH = Set.of(
             UserState.LOGIN_AWAITING_USERNAME, UserState.LOGIN_AWAITING_PASSWORD,
@@ -57,6 +59,9 @@ public class AuthorizationService {
     private void authorizeForCallback(Update update, String chatId) {
 
         String query = update.getCallbackQuery().getData();
+        if(QUERIES_NEED_NO_AUTH.contains(query)) {
+            return;
+        }
         if(QUERIES_REQUIRE_NO_AUTH.contains(query)) {
             if (isAuthorized(chatId)) {
                 throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",

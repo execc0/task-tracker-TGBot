@@ -4,6 +4,7 @@ import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.navigation.NavigationHandler;
 import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -21,15 +22,16 @@ public class BotCallbackQueryDispatcher {
 
     private final Map<String, FlowCallbackQuery> botFlowQueryMap;
     private final StepHandlerDispatcher stepHandlerDispatcher;
-    private final BotService botService;
     private final MessageSender messageSender;
+    private final Map<String, NavigationHandler> navigationHandlerMap;
 
-    public BotCallbackQueryDispatcher(List<FlowCallbackQuery> flowQueryList, StepHandlerDispatcher stepHandlerDispatcher, BotService botService, MessageSender messageSender) {
+    public BotCallbackQueryDispatcher(List<FlowCallbackQuery> flowQueryList, StepHandlerDispatcher stepHandlerDispatcher,
+                                      MessageSender messageSender, Map<String, NavigationHandler> navigationHandlerMap) {
         botFlowQueryMap = flowQueryList.stream()
                 .collect(Collectors.toMap(query -> query.getQuery(), query -> query));
         this.stepHandlerDispatcher = stepHandlerDispatcher;
-        this.botService = botService;
         this.messageSender = messageSender;
+        this.navigationHandlerMap = navigationHandlerMap;
     }
 
     public void dispatchCallbackQuery(Update update, String chatId) {
@@ -39,6 +41,12 @@ public class BotCallbackQueryDispatcher {
         // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.
         if (botFlowQueryMap.containsKey(query)) {
             botFlowQueryMap.get(query).execute(chatId);
+            messageSender.answerCallback(callBackQueryId);
+            return;
+        }
+
+        if (navigationHandlerMap.containsKey(query)) {
+            navigationHandlerMap.get(query).handle(chatId);
             messageSender.answerCallback(callBackQueryId);
             return;
         }

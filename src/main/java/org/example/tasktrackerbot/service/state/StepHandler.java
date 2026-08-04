@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.service.step;
+package org.example.tasktrackerbot.service.state;
 
 public interface StepHandler {
     /**

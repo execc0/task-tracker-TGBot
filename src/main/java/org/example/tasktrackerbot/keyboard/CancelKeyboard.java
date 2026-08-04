@@ -1,21 +1,20 @@
 package org.example.tasktrackerbot.keyboard;
 
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 
-public interface Keyboard {
+@Component
+public class CancelKeyboard implements Keyboard {
 
-    public KeyboardType getKeyboardType();
+    @Override
+    public KeyboardType getKeyboardType() {
+        return KeyboardType.CANCEL;
+    }
 
-    public InlineKeyboardMarkup getKeyboard();
-
-    public default InlineKeyboardRow getCancelOrReturnRow() {
-
-        InlineKeyboardButton returnButton = InlineKeyboardButton.builder()
-                .text("Назад")
-                .callbackData("state:return")
-                .build();
+    @Override
+    public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton cancelButton = InlineKeyboardButton.builder()
                 .text("Отмена")
@@ -23,9 +22,8 @@ public interface Keyboard {
                 .build();
 
 
-        return new InlineKeyboardRow(returnButton, cancelButton);
-
+        return InlineKeyboardMarkup.builder()
+                .keyboardRow(new InlineKeyboardRow(cancelButton))
+                .build();
     }
-
-
 }

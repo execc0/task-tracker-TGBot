@@ -12,6 +12,7 @@ public class UserStateService {
     private final StringRedisTemplate stringRedisTemplate;
 
     private static final Duration STATE_TTL  = Duration.ofSeconds(900); // 15 minutes
+    private static final Duration MENU_TTL  = Duration.ofDays(30);
 
     public UserStateService(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
@@ -25,6 +26,10 @@ public class UserStateService {
         return "user:tmp:" + chatId;
     }
 
+    public String buildMenuKey(String chatId) {
+        return "user:menu:" + chatId;
+    }
+
     public UserState getState(String chatId) {
         String state = stringRedisTemplate.opsForValue().get(buildStateKey(chatId));
         if (state != null && !state.isEmpty()) {
@@ -33,6 +38,12 @@ public class UserStateService {
         return UserState.NONE;
     }
 
+
+    public void setMenuId(String chatId, String menuId) {
+        stringRedisTemplate.opsForValue().set(buildMenuKey(chatId), menuId, MENU_TTL);
+    }
+
+
     public void setState(String chatId, UserState state) {
         stringRedisTemplate.opsForValue().set(buildStateKey(chatId), state.toString(), STATE_TTL);
     }
@@ -40,6 +51,10 @@ public class UserStateService {
     public void setTemp(String chatId, String field, String value) {
         stringRedisTemplate.opsForHash().put(buildTempKey(chatId), field, value);
         stringRedisTemplate.expire(buildTempKey(chatId), STATE_TTL);
+    }
+
+    public String getMenuId(String chatId) {
+        return stringRedisTemplate.opsForValue().get(buildMenuKey(chatId));
     }
 
     public String getTempField(String chatId, String field) {

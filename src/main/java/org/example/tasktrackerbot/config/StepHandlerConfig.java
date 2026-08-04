@@ -1,7 +1,7 @@
 package org.example.tasktrackerbot.config;
 
-import org.example.tasktrackerbot.service.step.StepHandler;
-import org.example.tasktrackerbot.service.step.StepHandlerProvider;
+import org.example.tasktrackerbot.service.state.StepHandler;
+import org.example.tasktrackerbot.service.state.StepHandlerProvider;
 import org.example.tasktrackerbot.session.UserState;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

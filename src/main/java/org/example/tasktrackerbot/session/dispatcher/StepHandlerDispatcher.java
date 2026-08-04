@@ -1,6 +1,6 @@
 package org.example.tasktrackerbot.session.dispatcher;
 
-import org.example.tasktrackerbot.service.step.StepHandler;
+import org.example.tasktrackerbot.service.state.StepHandler;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.stereotype.Component;

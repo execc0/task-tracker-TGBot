@@ -1,16 +1,16 @@
 package org.example.tasktrackerbot.commands;
 
-import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 public class MenuCommand implements BotCommand {
 
-    private final BotService botService;
+    private final NavigationService navigationService;
 
-    public MenuCommand(BotService botService) {
-        this.botService = botService;
+    public MenuCommand(NavigationService navigationService) {
+        this.navigationService = navigationService;
     }
 
     @Override
@@ -23,6 +23,6 @@ public class MenuCommand implements BotCommand {
 
         String chatId = update.getMessage().getChatId().toString();
 
-        botService.mainMenu(chatId);
+        navigationService.mainMenu(chatId);
     }
 }

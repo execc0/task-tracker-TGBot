@@ -8,6 +8,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @Component
 public class TaskStatusKeyboard implements Keyboard {
 
+    public KeyboardType getKeyboardType() {
+        return KeyboardType.TASK_STATUS;
+    }
+
     @Override
     public InlineKeyboardMarkup getKeyboard() {
 
@@ -28,6 +32,7 @@ public class TaskStatusKeyboard implements Keyboard {
 
         return InlineKeyboardMarkup.builder()
                 .keyboardRow(new InlineKeyboardRow(TODOButton, inProgressButton, doneButton))
+                .keyboardRow(getCancelOrReturnRow())
                 .build();
 
     }

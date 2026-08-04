@@ -7,6 +7,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 @Component
 public class TaskPriorityKeyboard implements Keyboard {
+
+    public KeyboardType getKeyboardType() {
+        return KeyboardType.TASK_PRIORITY;
+    }
+
     @Override
     public InlineKeyboardMarkup getKeyboard() {
 
@@ -27,6 +32,7 @@ public class TaskPriorityKeyboard implements Keyboard {
 
         return InlineKeyboardMarkup.builder()
                 .keyboardRow(new InlineKeyboardRow(TODOButton, inProgressButton, doneButton))
+                .keyboardRow(getCancelOrReturnRow())
                 .build();
     }
 }

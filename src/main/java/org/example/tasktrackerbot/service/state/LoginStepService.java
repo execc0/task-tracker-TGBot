@@ -1,7 +1,9 @@
-package org.example.tasktrackerbot.service.step;
+package org.example.tasktrackerbot.service.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.request.UserLoginRequest;
+import org.example.tasktrackerbot.keyboard.CancelKeyboard;
+import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.*;
@@ -16,8 +18,10 @@ public class LoginStepService extends AbstractStateService implements StepHandle
                             MessageSender messageSender,
                             ObjectMapper objectMapper,
                             BotService botService,
-                            MessageDeleteScheduler messageDeleteScheduler) {
-        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler);
+                            MessageDeleteScheduler messageDeleteScheduler,
+                            CancelOrReturnKeyboard cancelOrReturnKeyboard,
+                            CancelKeyboard cancelKeyboard) {
+        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
     }
 
     @Override

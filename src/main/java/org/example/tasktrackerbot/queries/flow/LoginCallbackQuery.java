@@ -1,6 +1,6 @@
 package org.example.tasktrackerbot.queries.flow;
 
-import org.example.tasktrackerbot.service.step.LoginStepService;
+import org.example.tasktrackerbot.service.state.LoginStepService;
 import org.springframework.stereotype.Component;
 
 @Component

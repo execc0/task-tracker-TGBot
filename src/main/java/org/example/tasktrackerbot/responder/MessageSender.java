@@ -84,6 +84,32 @@ public class MessageSender {
         return execute(editMessage, chatId);
 
     }
+    public Integer editOrSendNewMessage(String chatId, String messageId, String message) {
+
+        try {
+            if (messageId != null) {
+                return editMessage(chatId, messageId, message);
+            }
+            throw new NullPointerException("Попытка отредактировать сообщение при messageId == null");
+        } catch (Exception e) {
+            return sendMessage(chatId, message);
+        }
+
+    }
+
+
+    public Integer editOrSendNewMessage(String chatId, String messageId, String message, InlineKeyboardMarkup keyboard) {
+
+        try {
+            if (messageId != null) {
+                return editMessage(chatId, messageId, message, keyboard);
+            }
+            throw new NullPointerException("Попытка отредактировать сообщение при messageId == null");
+        } catch (Exception e) {
+            return sendKeyboardMessage(chatId, message, keyboard);
+        }
+
+    }
 
     public void answerCallback(String callBackQueryId) {
         AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()

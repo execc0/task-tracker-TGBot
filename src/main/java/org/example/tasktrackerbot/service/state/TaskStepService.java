@@ -1,7 +1,9 @@
-package org.example.tasktrackerbot.service.step;
+package org.example.tasktrackerbot.service.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.request.TaskCreateRequest;
+import org.example.tasktrackerbot.keyboard.CancelKeyboard;
+import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskPriorityKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskStatusKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
@@ -21,10 +23,14 @@ public class TaskStepService extends AbstractStateService implements StepHandler
     public TaskStepService(BotService botService,
                            MessageSender messageSender,
                            UserStateService userStateService,
-                           ObjectMapper objectMapper, TaskPriorityKeyboard taskPriorityKeyboard,
+                           ObjectMapper objectMapper,
+                           TaskPriorityKeyboard taskPriorityKeyboard,
                            TaskStatusKeyboard taskStatusKeyboard,
-                           MessageDeleteScheduler messageDeleteScheduler) {
-        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler);
+                           MessageDeleteScheduler messageDeleteScheduler,
+                           CancelOrReturnKeyboard cancelOrReturnKeyboard,
+                           CancelKeyboard cancelKeyboard) {
+        super(botService, messageSender, userStateService, objectMapper,
+                messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
         this.taskPriorityKeyboard = taskPriorityKeyboard;
         this.taskStatusKeyboard = taskStatusKeyboard;
     }

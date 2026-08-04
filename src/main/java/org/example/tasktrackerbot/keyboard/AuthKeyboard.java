@@ -9,6 +9,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @Component
 public class AuthKeyboard implements Keyboard {
 
+    public KeyboardType getKeyboardType() {
+        return KeyboardType.AUTH_KEYBOARD;
+    }
+
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton loginButton = InlineKeyboardButton.builder()

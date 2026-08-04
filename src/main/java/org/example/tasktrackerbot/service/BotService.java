@@ -12,8 +12,11 @@ import org.example.tasktrackerbot.keyboard.AuthKeyboard;
 import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
+import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.example.tasktrackerbot.session.TokenHandlerService;
+import org.example.tasktrackerbot.session.UserState;
+import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,8 +29,10 @@ public class BotService {
     private final AuthKeyboard authKeyboard;
     private final MainMenuKeyboard mainMenuKeyboard;
     private final MessageDeleteScheduler messageDeleteScheduler;
+    private final UserStateService userStateService;
+    private final NavigationService navigationService;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard, MessageDeleteScheduler messageDeleteScheduler) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard, MessageDeleteScheduler messageDeleteScheduler, UserStateService userStateService, NavigationService navigationService) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
@@ -35,6 +40,8 @@ public class BotService {
         this.authKeyboard = authKeyboard;
         this.mainMenuKeyboard = mainMenuKeyboard;
         this.messageDeleteScheduler = messageDeleteScheduler;
+        this.userStateService = userStateService;
+        this.navigationService = navigationService;
     }
 
 
@@ -62,17 +69,12 @@ public class BotService {
         /menu
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
-        messageSender.sendKeyboardMessage(chatId, message, authKeyboard.getKeyboard());
-    }
-
-    public void mainMenu(String chatId) {
-
-        String message = """
-                Основное меню. Операции представлены ниже:
-                """;
-        messageSender.sendKeyboardMessage(chatId, message, mainMenuKeyboard.getKeyboard());
+        Integer menuId = messageSender.sendKeyboardMessage(chatId, message, authKeyboard.getKeyboard());
+        userStateService.setMenuId(chatId, menuId.toString());
 
     }
+
+
 
 
     public void register(String name, String username, String email, String password, String chatId) {
@@ -94,7 +96,7 @@ public class BotService {
 
         Integer sentMessageId = messageSender.sendMessage(chatId, "Регистрация прошла успешно");
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
-        messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
+        navigationService.mainMenu(chatId);
 
 
     }
@@ -131,7 +133,7 @@ public class BotService {
         tokenHandlerService.saveToken(chatId, token);
 
         Integer sentMessageId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
-        messageSender.sendKeyboardMessage(chatId, "Основное меню: ", mainMenuKeyboard.getKeyboard());
+        navigationService.mainMenu(chatId);
 
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 

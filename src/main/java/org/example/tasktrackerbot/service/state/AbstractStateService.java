@@ -1,6 +1,9 @@
-package org.example.tasktrackerbot.service.step;
+package org.example.tasktrackerbot.service.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.tasktrackerbot.keyboard.CancelKeyboard;
+import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
@@ -18,13 +21,23 @@ public abstract class AbstractStateService {
     protected final UserStateService userStateService;
     protected final ObjectMapper objectMapper;
     protected final MessageDeleteScheduler messageDeleteScheduler;
+    protected final CancelOrReturnKeyboard cancelOrReturnKeyboard;
+    protected final CancelKeyboard cancelKeyboard;
 
-    public AbstractStateService(BotService botCommandService, MessageSender messageSender, UserStateService userStateService, ObjectMapper objectMapper, MessageDeleteScheduler messageDeleteScheduler) {
+    public AbstractStateService(BotService botCommandService,
+                                MessageSender messageSender,
+                                UserStateService userStateService,
+                                ObjectMapper objectMapper,
+                                MessageDeleteScheduler messageDeleteScheduler,
+                                CancelOrReturnKeyboard cancelOrReturnKeyboard,
+                                CancelKeyboard cancelKeyboard) {
         this.botService = botCommandService;
         this.messageSender = messageSender;
         this.userStateService = userStateService;
         this.objectMapper = objectMapper;
         this.messageDeleteScheduler = messageDeleteScheduler;
+        this.cancelOrReturnKeyboard = cancelOrReturnKeyboard;
+        this.cancelKeyboard = cancelKeyboard;
     }
 
     protected void start(String chatId, UserState nextState, String message) {
@@ -42,7 +55,7 @@ public abstract class AbstractStateService {
         userStateService.clearTemp(chatId);
         userStateService.setState(chatId, nextState);
         String messageWithBar = buildProgressBar(nextState) + "\n" + message;
-        Integer messageId = messageSender.sendMessage(chatId, messageWithBar);
+        Integer messageId = messageSender.sendKeyboardMessage(chatId, messageWithBar, cancelKeyboard.getKeyboard());
         userStateService.setTemp(chatId, "bot_message_id", messageId.toString());
 
     }
@@ -53,7 +66,7 @@ public abstract class AbstractStateService {
         userStateService.setTemp(chatId, key, input);
         String messageId = userStateService.getTempField(chatId, "bot_message_id");
         String messageWithBar = buildProgressBar(nextState) + "\n" + message;
-        messageSender.editMessage(chatId, messageId, messageWithBar);
+        messageSender.editOrSendNewMessage(chatId, messageId, messageWithBar, cancelOrReturnKeyboard.getKeyboard());
         deleteUserMessage(chatId, userMessageId);
     }
 

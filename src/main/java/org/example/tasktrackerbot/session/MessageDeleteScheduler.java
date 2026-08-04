@@ -1,6 +1,7 @@
 package org.example.tasktrackerbot.session;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +25,10 @@ public class MessageDeleteScheduler {
     }
 
     public void scheduleDelete(String chatId, String messageId, Integer delaySeconds) {
+
+        if (messageId == null) {
+            throw new NullPointerException("Не удалось поставить в очередь удаление сообщения, messageId == null");
+        }
 
         log.info("Проверка сообщений на удаление...");
         String value = chatId + ":" + messageId;
