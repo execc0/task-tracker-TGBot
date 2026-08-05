@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.queries.dispatcher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
 import org.example.tasktrackerbot.responder.MessageSender;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
  * Кнопки делятся на два типа: те, что начинают новую цепочку диалога и те, что отвечают за выбор параметра внутри диалога.
  */
 @Component
+@Slf4j
 public class BotCallbackQueryDispatcher {
 
     private final Map<String, FlowCallbackQuery> botFlowQueryMap;
@@ -35,8 +37,11 @@ public class BotCallbackQueryDispatcher {
     }
 
     public void dispatchCallbackQuery(Update update, String chatId) {
+
+
         String query = update.getCallbackQuery().getData();
         String callBackQueryId = update.getCallbackQuery().getId();
+        log.info("Получено нажатие на кнопку из Telegram chatId: {} query: {}", chatId, query);
 
         // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.
         if (botFlowQueryMap.containsKey(query)) {
