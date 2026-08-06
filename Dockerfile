@@ -9,6 +9,7 @@ RUN chmod +x gradlew
 RUN ./gradlew dependencies --no-daemon || true
 
 COPY . .
+RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Runtime
