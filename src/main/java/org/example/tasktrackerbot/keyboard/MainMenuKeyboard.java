@@ -25,7 +25,7 @@ public class MainMenuKeyboard implements Keyboard {
                 .build();
 
         InlineKeyboardButton returnToAuthButton = InlineKeyboardButton.builder()
-                .text("Авторизация")
+                .text("Стартовое меню")
                 .callbackData("menu:start")
                 .build();
 

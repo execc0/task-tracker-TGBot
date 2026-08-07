@@ -8,6 +8,7 @@ import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.DTO.response.AuthResponse;
 import org.example.tasktrackerbot.exception.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -23,6 +24,8 @@ public class TaskTrackerApiClient {
 
     private final RestClient taskTrackerRestClient;
     private final ObjectMapper objectMapper;
+    @Value("${internal.api.key}")
+    private String internalApiKey;
 
     public TaskTrackerApiClient(RestClient taskTrackerRestClient,
                                 ObjectMapper objectMapper) {
@@ -36,6 +39,7 @@ public class TaskTrackerApiClient {
 
         String token = taskTrackerRestClient.post()
                 .uri("/auth/register-and-link")
+                .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
@@ -60,6 +64,7 @@ public class TaskTrackerApiClient {
 
         String token = taskTrackerRestClient.post()
                 .uri("/auth/login-and-link")
+                .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
@@ -83,6 +88,7 @@ public class TaskTrackerApiClient {
 
         taskTrackerRestClient.post()
                 .uri("/auth/unlink-social")
+                .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
@@ -100,6 +106,7 @@ public class TaskTrackerApiClient {
 
         return taskTrackerRestClient.post()
                 .uri("/auth/login/telegram")
+                .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
@@ -119,6 +126,7 @@ public class TaskTrackerApiClient {
         taskTrackerRestClient.post()
                 .uri("tasks/my")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
@@ -129,6 +137,8 @@ public class TaskTrackerApiClient {
                         }
                 )
                 .toBodilessEntity();
+
+        log.debug("Выполнен запрос к API: requestBody {}", request);
 
     }
 

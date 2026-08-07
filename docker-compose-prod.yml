@@ -1,0 +1,30 @@
+services:
+  bot:
+    build: .
+    container_name: telegram-bot
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - shared-network
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+
+  redis:
+    image: redis:7.2
+    container_name: redis-bot
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - shared-network
+
+volumes:
+  redis-data:
+
+networks:
+  shared-network:
+    external: true

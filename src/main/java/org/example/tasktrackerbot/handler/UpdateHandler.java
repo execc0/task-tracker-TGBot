@@ -1,5 +1,7 @@
 package org.example.tasktrackerbot.handler;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.commands.dispatcher.BotCommandDispatcher;
 import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
@@ -10,17 +12,21 @@ import org.example.tasktrackerbot.service.AuthorizationService;
 import org.example.tasktrackerbot.session.*;
 import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.longpolling.interfaces.LongPollingUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 @Component
 @Slf4j
-public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
+public class UpdateHandler implements LongPollingUpdateConsumer {
 
     private final BotCallbackQueryDispatcher callbackQueryDispatcher;
     private final GlobalExceptionHandler exceptionHandler;
@@ -28,6 +34,10 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
     private final UserStateService userStateService;
     private final StepHandlerDispatcher stepHandlerDispatcher;
     private final AuthorizationService authorizationService;
+    private final ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
+    private final Cache<String, ReentrantLock> chatLocks = Caffeine.newBuilder()
+                    .expireAfterAccess(30L, TimeUnit.MINUTES)
+                    .build();
 
     public UpdateHandler(GlobalExceptionHandler exceptionHandler,
                          BotCommandDispatcher commandDispatcher,
@@ -44,17 +54,26 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
     @Override
     public void consume(List<Update> updates) {
-        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
+        // Виртуальный поток для каждого обновления
+        updates.forEach(update ->
+                    virtualExecutor.execute(() -> consume(update)));
+
     }
 
-    @Override
     public void consume(Update update) {
 
         String chatId = null;
 
         try {
-
             chatId = extractChatId(update);
+        } catch (Exception e) {
+            exceptionHandler.handle(chatId, e);
+        }
+
+        // Получаем или создаем лок для конкретного chatId
+        ReentrantLock lock = chatLocks.get(chatId, id -> new ReentrantLock());
+        lock.lock();
+        try {
 
             authorizationService.authorize(update, chatId);
 
@@ -83,6 +102,8 @@ public class UpdateHandler implements LongPollingSingleThreadUpdateConsumer {
 
         } catch (Exception exception) {
             exceptionHandler.handle(chatId, exception);
+        } finally {
+            lock.unlock();
         }
 
     }
