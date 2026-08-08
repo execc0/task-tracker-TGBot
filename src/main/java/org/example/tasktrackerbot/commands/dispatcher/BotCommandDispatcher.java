@@ -2,6 +2,7 @@ package org.example.tasktrackerbot.commands.dispatcher;
 
 import org.example.tasktrackerbot.commands.BotCommand;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
+import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 @Component
 public class BotCommandDispatcher {
 
+    private final MessageSender messageSender;
     private final Map<String, BotCommand> botCommandMap;
 
-    public BotCommandDispatcher(List<BotCommand> botCommandList) {
+    public BotCommandDispatcher(MessageSender messageSender, List<BotCommand> botCommandList) {
+        this.messageSender = messageSender;
         botCommandMap = botCommandList.stream()
                 .collect(Collectors.toMap(botCommand -> botCommand.getCommand(), botCommand -> botCommand));
     }
@@ -30,6 +33,8 @@ public class BotCommandDispatcher {
             throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + command
                     + "\nДля начала работы введите /start");
         }
+        Integer messageId = update.getMessage().getMessageId();
+        messageSender.deleteMessage(chatId, messageId.toString());
         botCommandMap.get(command).execute(update);
 
     }

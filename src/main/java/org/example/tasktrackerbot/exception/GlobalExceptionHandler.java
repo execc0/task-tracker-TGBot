@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,11 @@ public class GlobalExceptionHandler {
             Integer messageId = messageSender.sendMessage(chatId, botException.getMessage());
             messageDeleteScheduler.scheduleDelete(chatId, messageId.toString(), 10);
             return;
+        }
+        if (exception instanceof ResourceAccessException resourceAccessException) {
+            log.error("Task Tracker API недоступен: {}", resourceAccessException.getMessage());
+            Integer messageId = messageSender.sendMessage(chatId, "Сервер временно недоступен. Пожалуйста, повторите попытку позже.");
+            messageDeleteScheduler.scheduleDelete(chatId, messageId.toString(), 10);
         }
         handleGeneral(exception);
 
