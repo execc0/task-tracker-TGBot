@@ -50,6 +50,7 @@ public class BotCallbackQueryDispatcher {
             return;
         }
 
+        // Обработка навигации
         if (navigationHandlerMap.containsKey(query)) {
             navigationHandlerMap.get(query).handle(chatId);
             messageSender.answerCallback(callBackQueryId);

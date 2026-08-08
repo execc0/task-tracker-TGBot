@@ -1,45 +1,55 @@
 package org.example.tasktrackerbot.service.navigation;
 
-import org.example.tasktrackerbot.keyboard.AuthKeyboard;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
-import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class NavigationService {
 
     private final MessageSender messageSender;
-    private final MainMenuKeyboard mainMenuKeyboard;
-    private final AuthKeyboard authKeyboard;
     private final UserStateService userStateService;
-    private final Map<KeyboardType, Keyboard> keyboardMap;
+    private final Map<KeyboardType, Keyboard> keyboardProviderMap;
 
-    public NavigationService(MessageSender messageSender, MainMenuKeyboard mainMenuKeyboard,
-                             AuthKeyboard authKeyboard, UserStateService userStateService, Map<KeyboardType, Keyboard> keyboardMap) {
+    public NavigationService(MessageSender messageSender,
+                             UserStateService userStateService,
+                             Map<KeyboardType, Keyboard> keyboardMap) {
         this.messageSender = messageSender;
-        this.mainMenuKeyboard = mainMenuKeyboard;
-        this.authKeyboard = authKeyboard;
         this.userStateService = userStateService;
-        this.keyboardMap = keyboardMap;
+        this.keyboardProviderMap = keyboardMap;
     }
 
     @Bean
     public Map<String, NavigationHandler> createNavigationHandlerMap() {
+
         return Map.of("state:cancel", this::cancel,
                 "state:return", this::returnToPreviousStep,
-                "menu:main", this::mainMenu,
-                "menu:start", this::startMenu);
+                Objects.requireNonNull(KeyboardType.MAIN_MENU.getCallback()), this::mainMenu,
+                Objects.requireNonNull(KeyboardType.AUTH_MENU.getCallback()), this::startMenu,
+                Objects.requireNonNull(KeyboardType.TASK_MENU.getCallback()), this::taskMenu);
     }
 
+
+    public void taskMenu(String chatId) {
+
+        String menuId = getMenuMessageId(chatId);
+        String message = """
+                Меню операций с задачами. Выберите нужную операцию ниже:
+                """;
+        Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
+                keyboardProviderMap.get(KeyboardType.TASK_MENU).getKeyboard());
+        userStateService.setMenuId(chatId, newMenuId.toString());
+
+    }
 
 
     public void mainMenu(String chatId) {
@@ -47,9 +57,10 @@ public class NavigationService {
         String message = """
                 Основное меню. Операции представлены ниже:
                 """;
-        String messageId = getMenuMessageId(chatId);
-        Integer menuId = messageSender.editOrSendNewMessage(chatId, messageId, message, mainMenuKeyboard.getKeyboard());
-        userStateService.setMenuId(chatId, menuId.toString());
+        String menuId = getMenuMessageId(chatId);
+        Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
+                keyboardProviderMap.get(KeyboardType.MAIN_MENU).getKeyboard());
+        userStateService.setMenuId(chatId, newMenuId.toString());
 
     }
 
@@ -64,7 +75,8 @@ public class NavigationService {
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
         String messageId = getMenuMessageId(chatId);
-        Integer menuId = messageSender.editOrSendNewMessage(chatId, messageId, message, authKeyboard.getKeyboard());
+        Integer menuId = messageSender.editOrSendNewMessage(chatId, messageId, message,
+                keyboardProviderMap.get(KeyboardType.AUTH_MENU).getKeyboard());
         userStateService.setMenuId(chatId, menuId.toString());
 
     }
@@ -92,12 +104,12 @@ public class NavigationService {
 
         InlineKeyboardMarkup keyboard;
 
-        if (keyboardType != null && keyboardMap.containsKey(keyboardType)) {
-             keyboard = keyboardMap.get(keyboardType).getKeyboard();
+        if (keyboardType != null && keyboardProviderMap.containsKey(keyboardType)) {
+             keyboard = keyboardProviderMap.get(keyboardType).getKeyboard();
         } else {
             if (previousState.getPreviousState() == UserState.NONE) {
-                keyboard = keyboardMap.get(KeyboardType.CANCEL).getKeyboard();
-            } else keyboard = keyboardMap.get(KeyboardType.RETURN_OR_CANCEL).getKeyboard();
+                keyboard = keyboardProviderMap.get(KeyboardType.CANCEL).getKeyboard();
+            } else keyboard = keyboardProviderMap.get(KeyboardType.RETURN_OR_CANCEL).getKeyboard();
 
         }
 

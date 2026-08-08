@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.DTO.request.signable;
+package org.example.tasktrackerbot.DTO.API.request.signable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,18 +9,17 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LinkRequest implements Signable {
+public class LoginByChatIdRequest implements Signable {
 
-    private String provider;
-
-    private String providerId;
+    private String chatId;
 
     private Long timestamp;
 
     private String signature;
 
+
     @Override
     public List<Object> getSignableFields() {
-        return List.of(provider, providerId, timestamp);
+        return List.of(chatId, timestamp);
     }
 }

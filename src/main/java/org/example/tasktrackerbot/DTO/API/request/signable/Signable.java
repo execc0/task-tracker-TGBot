@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.DTO.request.signable;
+package org.example.tasktrackerbot.DTO.API.request.signable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

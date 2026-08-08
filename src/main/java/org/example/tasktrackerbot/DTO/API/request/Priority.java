@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.DTO.request;
+package org.example.tasktrackerbot.DTO.API.request;
 
 public enum Priority {
     LOW,

@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.DTO.request;
+package org.example.tasktrackerbot.DTO.API.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

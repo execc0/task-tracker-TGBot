@@ -1,5 +1,4 @@
-package org.example.tasktrackerbot.DTO.request;
-
+package org.example.tasktrackerbot.DTO.API.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,10 +8,9 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginRequest {
+public class AuthResponse {
 
-    private String username;
     @ToString.Exclude
-    private String password;
+    private String token;
 
 }

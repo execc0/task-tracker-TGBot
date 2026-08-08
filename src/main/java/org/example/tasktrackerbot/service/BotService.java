@@ -1,23 +1,31 @@
 package org.example.tasktrackerbot.service;
 
-import org.example.tasktrackerbot.DTO.request.*;
-import org.example.tasktrackerbot.DTO.request.signable.LinkRequest;
-import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
-import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
-import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
+import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
+import org.example.tasktrackerbot.DTO.API.request.UnlinkSocialRequest;
+import org.example.tasktrackerbot.DTO.API.request.UserLoginRequest;
+import org.example.tasktrackerbot.DTO.API.request.UserRegisterRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.LinkRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.LoginAndLinkRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.LoginByChatIdRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.RegisterAndLinkRequest;
+import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
+import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
-import org.example.tasktrackerbot.exception.ApiLoginException;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
-import org.example.tasktrackerbot.keyboard.AuthKeyboard;
-import org.example.tasktrackerbot.keyboard.MainMenuKeyboard;
+import org.example.tasktrackerbot.keyboard.Keyboard;
+import org.example.tasktrackerbot.keyboard.KeyboardType;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
 import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.example.tasktrackerbot.session.TokenHandlerService;
-import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.stereotype.Component;
+
+
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class BotService {
@@ -26,22 +34,28 @@ public class BotService {
     private final MessageSender messageSender;
     private final SignatureService signatureService;
     private final TokenHandlerService tokenHandlerService;
-    private final AuthKeyboard authKeyboard;
-    private final MainMenuKeyboard mainMenuKeyboard;
+    private final Map<KeyboardType, Keyboard> keyboardProviderMap;
     private final MessageDeleteScheduler messageDeleteScheduler;
     private final UserStateService userStateService;
     private final NavigationService navigationService;
+    private final MessageFormatter messageFormatter;
 
-    public BotService(TaskTrackerApiClient taskTrackerApiClient, MessageSender messageSender, SignatureService signatureService, TokenHandlerService tokenHandlerService, AuthKeyboard authKeyboard, MainMenuKeyboard mainMenuKeyboard, MessageDeleteScheduler messageDeleteScheduler, UserStateService userStateService, NavigationService navigationService) {
+    public BotService(TaskTrackerApiClient taskTrackerApiClient,
+                      MessageSender messageSender,
+                      SignatureService signatureService,
+                      TokenHandlerService tokenHandlerService, Map<KeyboardType, Keyboard> keyboardProviderMap,
+                      MessageDeleteScheduler messageDeleteScheduler,
+                      UserStateService userStateService,
+                      NavigationService navigationService, MessageFormatter messageFormatter) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
         this.tokenHandlerService = tokenHandlerService;
-        this.authKeyboard = authKeyboard;
-        this.mainMenuKeyboard = mainMenuKeyboard;
+        this.keyboardProviderMap = keyboardProviderMap;
         this.messageDeleteScheduler = messageDeleteScheduler;
         this.userStateService = userStateService;
         this.navigationService = navigationService;
+        this.messageFormatter = messageFormatter;
     }
 
 
@@ -69,7 +83,8 @@ public class BotService {
         /menu
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         """;
-        Integer menuId = messageSender.sendKeyboardMessage(chatId, message, authKeyboard.getKeyboard());
+        Integer menuId = messageSender.sendKeyboardMessage(chatId, message,
+                keyboardProviderMap.get(KeyboardType.AUTH_MENU).getKeyboard());
         userStateService.setMenuId(chatId, menuId.toString());
 
     }
@@ -98,6 +113,23 @@ public class BotService {
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
         navigationService.mainMenu(chatId);
 
+
+    }
+
+    public void getOwnTasks(String chatId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        PageResponseDTO<TaskResponse> pageResponse = taskTrackerApiClient.getOwnTasks(token);
+
+        String tasksFormatted = messageFormatter.formatTaskDTOList(pageResponse.getContent());
+
+        String menuId = userStateService.getMenuId(chatId);
+
+        Integer newMessageId = messageSender.editOrSendNewMessage(chatId, menuId, tasksFormatted,
+                keyboardProviderMap.get(KeyboardType.TASK_LIST_MENU).getKeyboard());
+
+        userStateService.setMenuId(chatId, newMessageId.toString());
 
     }
 

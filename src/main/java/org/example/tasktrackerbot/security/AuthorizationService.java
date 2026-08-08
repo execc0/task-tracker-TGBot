@@ -1,11 +1,11 @@
-package org.example.tasktrackerbot.service;
+package org.example.tasktrackerbot.security;
 
 import org.example.tasktrackerbot.exception.ApiLoginException;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
+import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Set;

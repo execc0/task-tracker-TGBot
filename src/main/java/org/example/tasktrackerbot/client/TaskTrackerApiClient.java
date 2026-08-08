@@ -2,13 +2,17 @@ package org.example.tasktrackerbot.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.DTO.request.*;
-import org.example.tasktrackerbot.DTO.request.signable.LoginAndLinkRequest;
-import org.example.tasktrackerbot.DTO.request.signable.LoginByChatIdRequest;
-import org.example.tasktrackerbot.DTO.request.signable.RegisterAndLinkRequest;
-import org.example.tasktrackerbot.DTO.response.AuthResponse;
+import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
+import org.example.tasktrackerbot.DTO.API.request.UnlinkSocialRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.LoginAndLinkRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.LoginByChatIdRequest;
+import org.example.tasktrackerbot.DTO.API.request.signable.RegisterAndLinkRequest;
+import org.example.tasktrackerbot.DTO.API.response.AuthResponse;
+import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
+import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.exception.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @Component
@@ -139,6 +144,25 @@ public class TaskTrackerApiClient {
                 .toBodilessEntity();
 
         log.debug("Выполнен запрос к API: requestBody {}", request);
+
+    }
+
+    public PageResponseDTO<TaskResponse> getOwnTasks(String token) {
+
+        return taskTrackerRestClient.get()
+                .uri("tasks/my")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("X-Internal-API-Key", internalApiKey)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiUnlinkException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnTasks, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .body(new ParameterizedTypeReference<PageResponseDTO<TaskResponse>>() {
+                });
 
     }
 

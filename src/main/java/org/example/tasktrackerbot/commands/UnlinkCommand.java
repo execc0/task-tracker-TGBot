@@ -1,7 +1,6 @@
 package org.example.tasktrackerbot.commands;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.DTO.request.UnlinkSocialRequest;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.service.BotService;
 import org.springframework.stereotype.Component;

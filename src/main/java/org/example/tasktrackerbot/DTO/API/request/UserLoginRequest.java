@@ -1,4 +1,5 @@
-package org.example.tasktrackerbot.DTO.request;
+package org.example.tasktrackerbot.DTO.API.request;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,14 +9,10 @@ import lombok.ToString;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnlinkSocialRequest {
+public class UserLoginRequest {
 
     private String username;
     @ToString.Exclude
     private String password;
-
-    private String provider;
-
-    private String providerId;
 
 }

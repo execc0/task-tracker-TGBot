@@ -8,7 +8,7 @@ import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
-import org.example.tasktrackerbot.service.AuthorizationService;
+import org.example.tasktrackerbot.security.AuthorizationService;
 import org.example.tasktrackerbot.session.*;
 import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;

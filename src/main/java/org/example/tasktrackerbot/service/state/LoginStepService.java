@@ -1,7 +1,7 @@
 package org.example.tasktrackerbot.service.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.tasktrackerbot.DTO.request.UserLoginRequest;
+import org.example.tasktrackerbot.DTO.API.request.UserLoginRequest;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
 import org.example.tasktrackerbot.responder.MessageSender;

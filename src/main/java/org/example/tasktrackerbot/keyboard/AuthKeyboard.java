@@ -10,7 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 public class AuthKeyboard implements Keyboard {
 
     public KeyboardType getKeyboardType() {
-        return KeyboardType.AUTH_KEYBOARD;
+        return KeyboardType.AUTH_MENU;
     }
 
     public InlineKeyboardMarkup getKeyboard() {
@@ -32,7 +32,7 @@ public class AuthKeyboard implements Keyboard {
 
         InlineKeyboardButton menuButton = InlineKeyboardButton.builder()
                 .text("Основное меню")
-                .callbackData("menu:main")
+                .callbackData(KeyboardType.MAIN_MENU.getCallback())
                 .build();
 
         return InlineKeyboardMarkup.builder()

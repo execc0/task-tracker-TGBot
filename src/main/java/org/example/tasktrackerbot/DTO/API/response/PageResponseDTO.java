@@ -1,0 +1,20 @@
+package org.example.tasktrackerbot.DTO.API.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class PageResponseDTO <T> {
+
+    private List<T> content;        // данные
+    private int currentPage;        // текущая страница
+    private int totalPages;         // всего страниц
+    private long totalElements;     // всего записей
+    private boolean last;           // последняя страница?
+
+}

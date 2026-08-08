@@ -42,7 +42,7 @@ public class TokenHandlerService {
     }
 
     private String buildKey(String chatId) {
-        return "chat_id: " + chatId.trim();
+        return "chat_id:auth " + chatId.trim();
     }
 
 }
