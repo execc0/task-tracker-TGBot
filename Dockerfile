@@ -1,5 +1,5 @@
 # Build
-FROM gradle:8.10-jdk17-alpine AS build
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
 
 COPY build.gradle settings.gradle ./
@@ -13,7 +13,7 @@ RUN chmod +x gradlew
 RUN ./gradlew bootJar --no-daemon -x test
 
 # Runtime
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
 RUN addgroup -S spring && adduser -S spring -G spring
