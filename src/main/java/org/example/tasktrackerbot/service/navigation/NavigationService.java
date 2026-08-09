@@ -44,7 +44,12 @@ public class NavigationService implements QueryHandlerProvider {
 
         String menuId = getMenuMessageId(chatId);
         String message = """
-                Меню операций с задачами. Выберите нужную операцию ниже:
+                Меню операций с задачами. Доступные операции:
+                Создать - запускает процесс создания задачи.
+                Мои задачи - постранично выводит список ваших задач.
+                Свободные задачи - выводит список свободных задач. Свободную задачу может взять любой пользователь.
+                Редактировать - запускает процесс редактирования вашей задачи.
+                Удалить - запускает процесс удаления задачи.
                 """;
         Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
                 keyboardProviderMap.get(KeyboardType.TASK_MENU).getKeyboard());
@@ -56,7 +61,10 @@ public class NavigationService implements QueryHandlerProvider {
     public void mainMenu(String chatId) {
 
         String message = """
-                Основное меню. Операции представлены ниже:
+                Основное меню. Доступные операции:
+                Задачи - управление задачами. Создание, удаление, поиск, редактирование задач.
+                Профиль - управление профилем. Редактирование имени пользователя, смена пароля, смена email.
+                Авторизация - возврат к меню авторизации.
                 """;
         String menuId = getMenuMessageId(chatId);
         Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
@@ -69,11 +77,9 @@ public class NavigationService implements QueryHandlerProvider {
 
         String message = """
         Привет! Это бот для Task Tracker, сейчас находится в разработке.
-        Список доступных команд:
-        /register
-        /login
-        /menu
+        На данный момент реализован не весь функционал. Некоторые кнопки могут не работать, а описание не соответствовать действительности.
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
+        Ссылка на репозиторий бота: https://github.com/execc0/task-tracker-TGBot
         """;
         String messageId = getMenuMessageId(chatId);
         Integer menuId = messageSender.editOrSendNewMessage(chatId, messageId, message,
