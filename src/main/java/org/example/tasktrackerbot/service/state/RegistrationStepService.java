@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.UserRegisterRequest;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.QueryHandler;
+import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
-public class RegistrationStepService extends AbstractStateService implements StepHandlerProvider {
+public class RegistrationStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
 
     public RegistrationStepService(BotService botService,
@@ -26,11 +29,15 @@ public class RegistrationStepService extends AbstractStateService implements Ste
                 messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
     }
 
-    public Map<UserState, StepHandler> getHandlers() {
+    public Map<UserState, StepHandler> getStepHandlers() {
         return Map.of(UserState.REGISTER_AWAITING_NAME, this::handleNameStep,
                 UserState.REGISTER_AWAITING_USERNAME, this::handleUsernameStep,
                 UserState.REGISTER_AWAITING_EMAIL, this::handleEmailStep,
                 UserState.REGISTER_AWAITING_PASSWORD, this::handlePasswordStep);
+    }
+
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.REGISTER, this::startRegistration);
     }
 
     public void startRegistration(String chatId) {

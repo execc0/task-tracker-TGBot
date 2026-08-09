@@ -17,7 +17,7 @@ public class StepHandlerConfig {
     public Map<UserState, StepHandler> createStepHandlersMap(List<StepHandlerProvider> providerList) {
 
         return providerList.stream()
-                .flatMap(list -> list.getHandlers().entrySet().stream())
+                .flatMap(list -> list.getStepHandlers().entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     }

@@ -1,18 +1,13 @@
 package org.example.tasktrackerbot.queries.dispatcher;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
-import org.example.tasktrackerbot.queries.flow.FlowCallbackQuery;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.example.tasktrackerbot.service.BotService;
-import org.example.tasktrackerbot.service.navigation.NavigationHandler;
+import org.example.tasktrackerbot.service.QueryHandler;
 import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Dispatcher который отвечает за нахождение нужного обработчика для CallbackQuery (нажатий на кнопки)
@@ -22,18 +17,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BotCallbackQueryDispatcher {
 
-    private final Map<String, FlowCallbackQuery> botFlowQueryMap;
+    private final Map<String, QueryHandler> queryHandlerMap;
     private final StepHandlerDispatcher stepHandlerDispatcher;
     private final MessageSender messageSender;
-    private final Map<String, NavigationHandler> navigationHandlerMap;
 
-    public BotCallbackQueryDispatcher(List<FlowCallbackQuery> flowQueryList, StepHandlerDispatcher stepHandlerDispatcher,
-                                      MessageSender messageSender, Map<String, NavigationHandler> navigationHandlerMap) {
-        botFlowQueryMap = flowQueryList.stream()
-                .collect(Collectors.toMap(query -> query.getQuery(), query -> query));
+    public BotCallbackQueryDispatcher(Map<String, QueryHandler> queryHandlerMap, StepHandlerDispatcher stepHandlerDispatcher,
+                                      MessageSender messageSender) {
+        this.queryHandlerMap = queryHandlerMap;
+
         this.stepHandlerDispatcher = stepHandlerDispatcher;
         this.messageSender = messageSender;
-        this.navigationHandlerMap = navigationHandlerMap;
     }
 
     public void dispatchCallbackQuery(Update update, String chatId) {
@@ -43,19 +36,13 @@ public class BotCallbackQueryDispatcher {
         String callBackQueryId = update.getCallbackQuery().getId();
         log.info("Получено нажатие на кнопку из Telegram chatId: {} query: {}", chatId, query);
 
-        // Если callback - Flow (начало новой цепочки диалога) - вызываем нужный Flow обработчик.
-        if (botFlowQueryMap.containsKey(query)) {
-            botFlowQueryMap.get(query).execute(chatId);
+        // Обработка нажатий на кнопки (навигация или начало новой цепочки диалога)
+        if (queryHandlerMap.containsKey(query)) {
+            queryHandlerMap.get(query).handle(chatId);
             messageSender.answerCallback(callBackQueryId);
             return;
         }
 
-        // Обработка навигации
-        if (navigationHandlerMap.containsKey(query)) {
-            navigationHandlerMap.get(query).handle(chatId);
-            messageSender.answerCallback(callBackQueryId);
-            return;
-        }
 
         // Иначе: операция связана с вводом состояния, передаем в stepHandlerDispatcher
         String value = query.split(":")[1];

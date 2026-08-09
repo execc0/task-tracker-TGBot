@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.UserLoginRequest;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.QueryHandler;
+import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
-public class LoginStepService extends AbstractStateService implements StepHandlerProvider {
+public class LoginStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
     public LoginStepService(UserStateService userStateService,
                             MessageSender messageSender,
@@ -25,9 +28,14 @@ public class LoginStepService extends AbstractStateService implements StepHandle
     }
 
     @Override
-    public Map<UserState, StepHandler> getHandlers() {
+    public Map<UserState, StepHandler> getStepHandlers() {
         return Map.of(UserState.LOGIN_AWAITING_USERNAME, this::handleUsernameStep,
                 UserState.LOGIN_AWAITING_PASSWORD, this::handlePasswordStep);
+    }
+
+    @Override
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.LOGIN, this::startLogin);
     }
 
     public void startLogin(String chatId) {
@@ -46,5 +54,6 @@ public class LoginStepService extends AbstractStateService implements StepHandle
 
 
     }
+
 
 }

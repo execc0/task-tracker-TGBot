@@ -6,15 +6,18 @@ import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskPriorityKeyboard;
 import org.example.tasktrackerbot.keyboard.TaskStatusKeyboard;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.QueryHandler;
+import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
-public class TaskStepService extends AbstractStateService implements StepHandlerProvider {
+public class TaskStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
     private final TaskPriorityKeyboard taskPriorityKeyboard;
     private final TaskStatusKeyboard taskStatusKeyboard;
@@ -35,12 +38,16 @@ public class TaskStepService extends AbstractStateService implements StepHandler
         this.taskStatusKeyboard = taskStatusKeyboard;
     }
 
-    public Map<UserState, StepHandler> getHandlers() {
+    public Map<UserState, StepHandler> getStepHandlers() {
 
         return Map.of(UserState.TASK_CREATE_AWAITING_TITLE, this::handleTitleStep,
                 UserState.TASK_CREATE_AWAITING_DESCRIPTION, this::handleDescriptionStep,
                 UserState.TASK_CREATE_AWAITING_PRIORITY, this::handlePriorityStep,
                 UserState.TASK_CREATE_AWAITING_STATUS, this::handleStatusStep);
+    }
+
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.CREATE_TASK, this::startTaskCreation);
     }
 
     public void startTaskCreation(String chatId) {

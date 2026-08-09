@@ -6,6 +6,6 @@ import java.util.Map;
 
 public interface StepHandlerProvider {
 
-    public Map<UserState, StepHandler> getHandlers();
+    public Map<UserState, StepHandler> getStepHandlers();
 
 }

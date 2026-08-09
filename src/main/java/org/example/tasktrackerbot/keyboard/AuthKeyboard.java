@@ -1,6 +1,7 @@
 package org.example.tasktrackerbot.keyboard;
 
 
+import org.example.tasktrackerbot.queries.Query;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -17,17 +18,17 @@ public class AuthKeyboard implements Keyboard {
 
         InlineKeyboardButton loginButton = InlineKeyboardButton.builder()
                 .text("Вход")
-                .callbackData("auth:login")
+                .callbackData(Query.LOGIN.getCallback())
                 .build();
 
         InlineKeyboardButton registerButton = InlineKeyboardButton.builder()
                 .text("Регистрация")
-                .callbackData("auth:register")
+                .callbackData(Query.REGISTER.getCallback())
                 .build();
 
         InlineKeyboardButton unlinkButton = InlineKeyboardButton.builder()
                 .text("Отвязать")
-                .callbackData("auth:unlink")
+                .callbackData(Query.UNLINK.getCallback())
                 .build();
 
         InlineKeyboardButton menuButton = InlineKeyboardButton.builder()

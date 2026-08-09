@@ -10,7 +10,7 @@ public class TaskListMenu implements Keyboard {
 
     @Override
     public KeyboardType getKeyboardType() {
-        return KeyboardType.TASK_LIST_MENU;
+        return KeyboardType.GET_TASKS;
     }
 
     @Override

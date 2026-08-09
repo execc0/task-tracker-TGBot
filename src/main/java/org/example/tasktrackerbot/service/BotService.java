@@ -14,6 +14,7 @@ import org.example.tasktrackerbot.client.TaskTrackerApiClient;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.security.SignatureService;
@@ -21,14 +22,13 @@ import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
 import org.example.tasktrackerbot.session.TokenHandlerService;
 import org.example.tasktrackerbot.session.UserStateService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 
-import java.util.List;
 import java.util.Map;
 
-@Component
-public class BotService {
+@Service
+public class BotService implements QueryHandlerProvider {
 
     private final TaskTrackerApiClient taskTrackerApiClient;
     private final MessageSender messageSender;
@@ -56,6 +56,10 @@ public class BotService {
         this.userStateService = userStateService;
         this.navigationService = navigationService;
         this.messageFormatter = messageFormatter;
+    }
+
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.GET_TASKS, this::getOwnTasks);
     }
 
 
@@ -127,7 +131,7 @@ public class BotService {
         String menuId = userStateService.getMenuId(chatId);
 
         Integer newMessageId = messageSender.editOrSendNewMessage(chatId, menuId, tasksFormatted,
-                keyboardProviderMap.get(KeyboardType.TASK_LIST_MENU).getKeyboard());
+                keyboardProviderMap.get(KeyboardType.GET_TASKS).getKeyboard());
 
         userStateService.setMenuId(chatId, newMessageId.toString());
 

@@ -4,15 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.UnlinkSocialRequest;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.QueryHandler;
+import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
-public class UnlinkStepService extends AbstractStateService implements StepHandlerProvider {
+public class UnlinkStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
 
 
@@ -28,9 +31,13 @@ public class UnlinkStepService extends AbstractStateService implements StepHandl
     }
 
     @Override
-    public Map<UserState, StepHandler> getHandlers() {
+    public Map<UserState, StepHandler> getStepHandlers() {
         return Map.of(UserState.UNLINK_AWAITING_USERNAME, this::handleUsernameStep,
                 UserState.UNLINK_AWAITING_PASSWORD, this::handlePasswordStep);
+    }
+
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.UNLINK, this::startUnlink);
     }
 
     public void startUnlink(String chatId) {

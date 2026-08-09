@@ -1,6 +1,7 @@
 package org.example.tasktrackerbot.keyboard;
 
 import lombok.Getter;
+import org.example.tasktrackerbot.queries.Query;
 
 
 public enum KeyboardType {
@@ -8,11 +9,11 @@ public enum KeyboardType {
     RETURN_OR_CANCEL,
     CANCEL,
 
-    AUTH_MENU("menu:start"),
-    MAIN_MENU("menu:main"),
-    TASK_MENU("menu:task"),
-    USER_MENU("menu:user"),
-    TASK_LIST_MENU("menu:task_list"),
+    AUTH_MENU(Query.AUTH_MENU),
+    MAIN_MENU(Query.MAIN_MENU),
+    TASK_MENU(Query.TASK_MENU),
+    USER_MENU(Query.USER_MENU),
+    GET_TASKS(Query.GET_TASKS),
     TASK_PRIORITY,
     TASK_STATUS;
 
@@ -23,8 +24,8 @@ public enum KeyboardType {
         this.callback = null;
     }
 
-    KeyboardType(String callback) {
-        this.callback = callback;
+    KeyboardType(Query query) {
+        this.callback = query.getCallback();
     }
 
 

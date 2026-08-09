@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.keyboard;
 
+import org.example.tasktrackerbot.queries.Query;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -21,12 +22,12 @@ public class TaskMenuKeyboard implements Keyboard {
 
         InlineKeyboardButton createTaskButton = InlineKeyboardButton.builder()
                 .text("Создать задачу")
-                .callbackData("task:create")
+                .callbackData(Query.CREATE_TASK.getCallback())
                 .build();
 
         InlineKeyboardButton getOwnTasksButton = InlineKeyboardButton.builder()
                 .text("Мои задачи")
-                .callbackData("task:get_list")
+                .callbackData(Query.GET_TASKS.getCallback())
                 .build();
 
 

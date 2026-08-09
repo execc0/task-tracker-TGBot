@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.keyboard;
 
+import org.example.tasktrackerbot.queries.Query;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -18,7 +19,7 @@ public class CancelKeyboard implements Keyboard {
 
         InlineKeyboardButton cancelButton = InlineKeyboardButton.builder()
                 .text("Отмена")
-                .callbackData("state:cancel")
+                .callbackData(Query.STATE_CANCEL.getCallback())
                 .build();
 
 

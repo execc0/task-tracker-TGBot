@@ -2,8 +2,10 @@ package org.example.tasktrackerbot.service.navigation;
 
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
+import org.example.tasktrackerbot.queries.Query;
 import org.example.tasktrackerbot.responder.MessageSender;
-import org.example.tasktrackerbot.service.BotService;
+import org.example.tasktrackerbot.service.QueryHandler;
+import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
-public class NavigationService {
+public class NavigationService implements QueryHandlerProvider {
 
     private final MessageSender messageSender;
     private final UserStateService userStateService;
@@ -28,14 +30,13 @@ public class NavigationService {
         this.keyboardProviderMap = keyboardMap;
     }
 
-    @Bean
-    public Map<String, NavigationHandler> createNavigationHandlerMap() {
-
-        return Map.of("state:cancel", this::cancel,
-                "state:return", this::returnToPreviousStep,
-                Objects.requireNonNull(KeyboardType.MAIN_MENU.getCallback()), this::mainMenu,
-                Objects.requireNonNull(KeyboardType.AUTH_MENU.getCallback()), this::startMenu,
-                Objects.requireNonNull(KeyboardType.TASK_MENU.getCallback()), this::taskMenu);
+    @Override
+    public Map<Query, QueryHandler> getQueryHandlers() {
+        return Map.of(Query.STATE_CANCEL, this::cancel,
+                Query.STATE_RETURN, this::returnToPreviousStep,
+                Query.MAIN_MENU, this::mainMenu,
+                Query.AUTH_MENU, this::startMenu,
+                Query.TASK_MENU, this::taskMenu);
     }
 
 
@@ -149,6 +150,7 @@ public class NavigationService {
         return progressBar + String.format(" Шаг %d/%d", currentStep, totalSteps);
 
     }
+
 
 
 }
