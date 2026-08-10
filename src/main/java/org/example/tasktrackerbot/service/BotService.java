@@ -29,8 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+/**
+ * Класс - промежуточный слой между запросом к TaskTracker API и пошаговой обработкой состояний/навигации.
+ * Отвечает за формирование тела запроса, контроль над JWT токенами
+ */
 @Service
-public class BotService implements QueryHandlerProvider {
+public class BotService {
 
     private final TaskTrackerApiClient taskTrackerApiClient;
     private final MessageSender messageSender;
@@ -39,16 +43,16 @@ public class BotService implements QueryHandlerProvider {
     private final Map<KeyboardType, Keyboard> keyboardProviderMap;
     private final MessageDeleteScheduler messageDeleteScheduler;
     private final UserStateService userStateService;
-    private final NavigationService navigationService;
     private final MessageFormatter messageFormatter;
 
     public BotService(TaskTrackerApiClient taskTrackerApiClient,
                       MessageSender messageSender,
                       SignatureService signatureService,
-                      TokenHandlerService tokenHandlerService, Map<KeyboardType, Keyboard> keyboardProviderMap,
+                      TokenHandlerService tokenHandlerService,
+                      Map<KeyboardType, Keyboard> keyboardProviderMap,
                       MessageDeleteScheduler messageDeleteScheduler,
                       UserStateService userStateService,
-                      NavigationService navigationService, MessageFormatter messageFormatter) {
+                      MessageFormatter messageFormatter) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
@@ -56,13 +60,7 @@ public class BotService implements QueryHandlerProvider {
         this.keyboardProviderMap = keyboardProviderMap;
         this.messageDeleteScheduler = messageDeleteScheduler;
         this.userStateService = userStateService;
-        this.navigationService = navigationService;
         this.messageFormatter = messageFormatter;
-    }
-
-    public Map<Query, QueryHandler> getQueryHandlers() {
-        return Map.of(Query.GET_TASKS, this::getOwnTasks,
-                Query.USER_MENU, this::getOwnUser);
     }
 
 
@@ -97,8 +95,6 @@ public class BotService implements QueryHandlerProvider {
     }
 
 
-
-
     public void register(String name, String username, String email, String password, String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {
@@ -118,24 +114,20 @@ public class BotService implements QueryHandlerProvider {
 
         Integer sentMessageId = messageSender.sendMessage(chatId, "Регистрация прошла успешно");
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
-        navigationService.mainMenu(chatId);
+
 
 
     }
 
-    public void getOwnUser(String chatId) {
+    public UserResponse getOwnUser(String chatId) {
 
         String token = tokenHandlerService.getToken(chatId);
 
-        UserResponse userResponse = taskTrackerApiClient.getOwnUser(token);
-
-        String responseFormatted = messageFormatter.formatUserDTO(userResponse);
-
-        navigationService.profileMenu(chatId, responseFormatted);
+        return taskTrackerApiClient.getOwnUser(token);
 
     }
 
-    public void getOwnTasks(String chatId) {
+    public PageResponseDTO<TaskResponse> getOwnTasks(String chatId) {
 
         String token = tokenHandlerService.getToken(chatId);
 
@@ -146,14 +138,9 @@ public class BotService implements QueryHandlerProvider {
                     String.format("Ошибка при вызове метода getOwnTasks chatId: %s список задач пуст.", chatId));
         }
 
-        String tasksFormatted = messageFormatter.formatTaskDTOList(pageResponse.getContent());
+        return pageResponse;
 
-        String menuId = userStateService.getMenuId(chatId);
 
-        Integer newMessageId = messageSender.editOrSendNewMessage(chatId, menuId, tasksFormatted,
-                keyboardProviderMap.get(KeyboardType.GET_TASKS).getKeyboard());
-
-        userStateService.setMenuId(chatId, newMessageId.toString());
 
     }
 
@@ -189,7 +176,6 @@ public class BotService implements QueryHandlerProvider {
         tokenHandlerService.saveToken(chatId, token);
 
         Integer sentMessageId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
-        navigationService.mainMenu(chatId);
 
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 

@@ -9,6 +9,7 @@ import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
 import org.example.tasktrackerbot.service.QueryHandlerProvider;
+import org.example.tasktrackerbot.service.navigation.NavigationService;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ import java.util.Map;
 @Service
 public class RegistrationStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
+    private final NavigationService navigationService;
+
 
     public RegistrationStepService(BotService botService,
                                    MessageSender messageSender,
@@ -24,9 +27,10 @@ public class RegistrationStepService extends AbstractStateService implements Ste
                                    ObjectMapper objectMapper,
                                    MessageDeleteScheduler messageDeleteScheduler,
                                    CancelOrReturnKeyboard cancelOrReturnKeyboard,
-                                   CancelKeyboard cancelKeyboard) {
+                                   CancelKeyboard cancelKeyboard, NavigationService navigationService) {
         super(botService, messageSender, userStateService, objectMapper,
                 messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
+        this.navigationService = navigationService;
     }
 
     public Map<UserState, StepHandler> getStepHandlers() {
@@ -61,6 +65,7 @@ public class RegistrationStepService extends AbstractStateService implements Ste
         userStateService.setTemp(chatId, "password", password);
         UserRegisterRequest request = super.finishFlow(chatId, messageId, UserRegisterRequest.class);
         botService.register(request.getName(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
+        navigationService.mainMenu(chatId);
 
     }
 

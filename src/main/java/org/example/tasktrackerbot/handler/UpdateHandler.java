@@ -8,7 +8,7 @@ import org.example.tasktrackerbot.exception.GlobalExceptionHandler;
 import org.example.tasktrackerbot.exception.InvalidCommandInputException;
 import org.example.tasktrackerbot.exception.NullMessageException;
 import org.example.tasktrackerbot.queries.dispatcher.BotCallbackQueryDispatcher;
-import org.example.tasktrackerbot.security.AuthorizationService;
+import org.example.tasktrackerbot.security.AuthorizationFilter;
 import org.example.tasktrackerbot.session.*;
 import org.example.tasktrackerbot.session.dispatcher.StepHandlerDispatcher;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
     private final BotCommandDispatcher commandDispatcher;
     private final UserStateService userStateService;
     private final StepHandlerDispatcher stepHandlerDispatcher;
-    private final AuthorizationService authorizationService;
+    private final AuthorizationFilter authorizationFilter;
     private final ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
     private final Cache<String, ReentrantLock> chatLocks = Caffeine.newBuilder()
                     .expireAfterAccess(30L, TimeUnit.MINUTES)
@@ -43,13 +43,13 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
                          BotCommandDispatcher commandDispatcher,
                          BotCallbackQueryDispatcher callbackQueryDispatcher,
                          UserStateService userStateService,
-                         StepHandlerDispatcher stepHandlerDispatcher, AuthorizationService authorizationService) {
+                         StepHandlerDispatcher stepHandlerDispatcher, AuthorizationFilter authorizationFilter) {
         this.callbackQueryDispatcher = callbackQueryDispatcher;
         this.exceptionHandler = exceptionHandler;
         this.commandDispatcher = commandDispatcher;
         this.userStateService = userStateService;
         this.stepHandlerDispatcher = stepHandlerDispatcher;
-        this.authorizationService = authorizationService;
+        this.authorizationFilter = authorizationFilter;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
         lock.lock();
         try {
 
-            authorizationService.authorize(update, chatId);
+            authorizationFilter.filter(update, chatId);
 
             // Callback - обработка нажатий на кнопки
             if (update.hasCallbackQuery()) {

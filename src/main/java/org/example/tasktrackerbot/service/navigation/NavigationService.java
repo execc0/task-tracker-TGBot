@@ -1,9 +1,14 @@
 package org.example.tasktrackerbot.service.navigation;
 
+import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
+import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
+import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
 import org.example.tasktrackerbot.queries.Query;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
+import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
 import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.session.UserState;
@@ -21,13 +26,17 @@ public class NavigationService implements QueryHandlerProvider {
     private final MessageSender messageSender;
     private final UserStateService userStateService;
     private final Map<KeyboardType, Keyboard> keyboardProviderMap;
+    private final BotService botService;
+    private final MessageFormatter messageFormatter;
 
     public NavigationService(MessageSender messageSender,
                              UserStateService userStateService,
-                             Map<KeyboardType, Keyboard> keyboardMap) {
+                             Map<KeyboardType, Keyboard> keyboardMap, BotService botService, MessageFormatter messageFormatter) {
         this.messageSender = messageSender;
         this.userStateService = userStateService;
         this.keyboardProviderMap = keyboardMap;
+        this.botService = botService;
+        this.messageFormatter = messageFormatter;
     }
 
     @Override
@@ -36,12 +45,11 @@ public class NavigationService implements QueryHandlerProvider {
                 Query.STATE_RETURN, this::returnToPreviousStep,
                 Query.MAIN_MENU, this::mainMenu,
                 Query.AUTH_MENU, this::startMenu,
-                Query.TASK_MENU, this::taskMenu);
+                Query.TASK_MENU, this::taskMenu,
+                Query.GET_TASKS, this::taskListMenu,
+                Query.USER_MENU, this::profileMenu);
     }
 
-    public void profileMenu() {
-
-    }
 
     public void taskMenu(String chatId) {
 
@@ -61,9 +69,27 @@ public class NavigationService implements QueryHandlerProvider {
 
     }
 
-    public void profileMenu(String chatId, String userFormatted) {
+    public void taskListMenu(String chatId) {
+
+        PageResponseDTO<TaskResponse> pageResponse = botService.getOwnTasks(chatId);
+
+        String tasksFormatted = messageFormatter.formatTaskDTOList(pageResponse.getContent());
+
+        String menuId = userStateService.getMenuId(chatId);
+
+        Integer newMessageId = messageSender.editOrSendNewMessage(chatId, menuId, tasksFormatted,
+                keyboardProviderMap.get(KeyboardType.GET_TASKS).getKeyboard());
+
+        userStateService.setMenuId(chatId, newMessageId.toString());
+
+    }
+
+    public void profileMenu(String chatId) {
 
         String menuId = getMenuMessageId(chatId);
+        UserResponse userResponse = botService.getOwnUser(chatId);
+        String userFormatted = messageFormatter.formatUserDTO(userResponse);
+
         String message = "\uD83D\uDC64 <b>Ваш профиль:</b> \n\n" + userFormatted;
 
         Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,

@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.Set;
 
 @Service
-public class AuthorizationService {
+public class AuthorizationFilter {
 
     private final BotService botService;
     private final UserStateService userStateService;
@@ -24,7 +24,7 @@ public class AuthorizationService {
             UserState.REGISTER_AWAITING_EMAIL, UserState.REGISTER_AWAITING_PASSWORD
     );
 
-    public AuthorizationService(BotService botService, UserStateService userStateService) {
+    public AuthorizationFilter(BotService botService, UserStateService userStateService) {
         this.botService = botService;
         this.userStateService = userStateService;
     }
@@ -39,7 +39,7 @@ public class AuthorizationService {
         return isAuthorized;
     }
 
-    public void authorize(Update update, String chatId) {
+    public void filter(Update update, String chatId) {
 
         if (update.hasCallbackQuery()) {
             authorizeForCallback(update, chatId);

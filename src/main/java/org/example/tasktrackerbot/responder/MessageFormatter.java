@@ -30,10 +30,10 @@ public class MessageFormatter {
 
     public String formatUserDTO(UserResponse userResponse) {
 
-        return "\uD83C\uDD94 <b>Пользователь id#</b>" + userResponse.getId() + "\n" +
-                "\uD83D\uDCDD <b>Имя:</b> " + userResponse.getName() + "\n" +
-                "\uD83D\uDD17 <b>Username:</b> " + userResponse.getUsername() + "\n" +
-                "\uD83D\uDCE7 <b>Email:</b> " + userResponse.getEmail() + "\n";
+        return "<b>Пользователь</b> id#" + userResponse.getId() + "\n" +
+                "<b>Имя:</b> " + userResponse.getName() + "\n" +
+                "<b>Username:</b> " + userResponse.getUsername() + "\n" +
+                "<b>Email:</b> " + userResponse.getEmail() + "\n";
 
     }
 

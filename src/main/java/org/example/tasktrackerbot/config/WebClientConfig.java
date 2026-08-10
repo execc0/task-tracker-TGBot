@@ -47,7 +47,7 @@ public class WebClientConfig {
 
     private String extractErrorMessage(ApiErrorResponse response) {
         if (response.errors() != null && !response.errors().isEmpty()) {
-            return String.join(".\n", response.errors());
+            return "Ошибка!\n" + String.join(".\n", response.errors());
         }
         if (response.message() != null) {
             return response.message();
