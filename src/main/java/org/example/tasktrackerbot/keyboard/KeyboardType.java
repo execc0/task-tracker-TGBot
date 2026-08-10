@@ -14,6 +14,7 @@ public enum KeyboardType {
     TASK_MENU(Query.TASK_MENU),
     USER_MENU(Query.USER_MENU),
     GET_TASKS(Query.GET_TASKS),
+    PROFILE_MENU(Query.PROFILE_MENU),
     TASK_PRIORITY,
     TASK_STATUS;
 

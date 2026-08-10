@@ -10,7 +10,9 @@ import org.example.tasktrackerbot.DTO.API.request.signable.LoginByChatIdRequest;
 import org.example.tasktrackerbot.DTO.API.request.signable.RegisterAndLinkRequest;
 import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
+import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
+import org.example.tasktrackerbot.exception.NotFoundException;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
@@ -59,7 +61,8 @@ public class BotService implements QueryHandlerProvider {
     }
 
     public Map<Query, QueryHandler> getQueryHandlers() {
-        return Map.of(Query.GET_TASKS, this::getOwnTasks);
+        return Map.of(Query.GET_TASKS, this::getOwnTasks,
+                Query.USER_MENU, this::getOwnUser);
     }
 
 
@@ -120,11 +123,28 @@ public class BotService implements QueryHandlerProvider {
 
     }
 
+    public void getOwnUser(String chatId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        UserResponse userResponse = taskTrackerApiClient.getOwnUser(token);
+
+        String responseFormatted = messageFormatter.formatUserDTO(userResponse);
+
+        navigationService.profileMenu(chatId, responseFormatted);
+
+    }
+
     public void getOwnTasks(String chatId) {
 
         String token = tokenHandlerService.getToken(chatId);
 
         PageResponseDTO<TaskResponse> pageResponse = taskTrackerApiClient.getOwnTasks(token);
+
+        if (pageResponse.getContent().isEmpty()) {
+            throw new NotFoundException("Список ваших задач пуст. Попробуйте создать новую задачу.",
+                    String.format("Ошибка при вызове метода getOwnTasks chatId: %s список задач пуст.", chatId));
+        }
 
         String tasksFormatted = messageFormatter.formatTaskDTOList(pageResponse.getContent());
 

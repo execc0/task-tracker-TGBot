@@ -14,7 +14,8 @@ public enum Query {
     AUTH_MENU("menu:start"),
     MAIN_MENU("menu:main"),
     TASK_MENU("menu:task"),
-    USER_MENU("menu:user");
+    USER_MENU("menu:user"),
+    PROFILE_MENU("menu:profile");
 
     @Getter
     private final String callback;

@@ -32,7 +32,8 @@ public class TaskMenuKeyboard implements Keyboard {
 
 
         return InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(returnToMainMenu, createTaskButton, getOwnTasksButton))
+                .keyboardRow(new InlineKeyboardRow(createTaskButton, getOwnTasksButton))
+                .keyboardRow(new InlineKeyboardRow(returnToMainMenu))
                 .build();
 
     }

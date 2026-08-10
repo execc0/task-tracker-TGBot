@@ -17,7 +17,7 @@ public class TaskListMenu implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
 
-        InlineKeyboardButton returnToMainMenu = InlineKeyboardButton.builder()
+        InlineKeyboardButton returnToTaskMenu = InlineKeyboardButton.builder()
                 .text("Назад")
                 .callbackData(KeyboardType.TASK_MENU.getCallback())
                 .build();
@@ -34,7 +34,8 @@ public class TaskListMenu implements Keyboard {
 
 
         return InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(returnToMainMenu, createTaskButton, getOwnTasksButton))
+                .keyboardRow(new InlineKeyboardRow(createTaskButton, getOwnTasksButton))
+                .keyboardRow(new InlineKeyboardRow(returnToTaskMenu))
                 .build();
 
 

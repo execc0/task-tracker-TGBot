@@ -15,24 +15,24 @@ public class MainMenuKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton taskMenuButton = InlineKeyboardButton.builder()
-                .text("Задачи")
+                .text("\uD83D\uDCDD Задачи")
                 .callbackData(KeyboardType.TASK_MENU.getCallback())
                 .build();
 
         InlineKeyboardButton profileMenuButton = InlineKeyboardButton.builder()
-                .text("Профиль")
+                .text("\uD83D\uDC64 Профиль")
                 .callbackData(KeyboardType.USER_MENU.getCallback())
                 .build();
 
-
         InlineKeyboardButton returnToAuthButton = InlineKeyboardButton.builder()
-                .text("Стартовое меню")
+                .text("\uD83D\uDEAA Назад")
                 .callbackData(KeyboardType.AUTH_MENU.getCallback())
                 .build();
 
 
         return InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(returnToAuthButton, taskMenuButton, profileMenuButton))
+                .keyboardRow(new InlineKeyboardRow(taskMenuButton, profileMenuButton))
+                .keyboardRow(new InlineKeyboardRow(returnToAuthButton))
                 .build();
 
     }

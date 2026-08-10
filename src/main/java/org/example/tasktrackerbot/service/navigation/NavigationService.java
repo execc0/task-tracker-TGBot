@@ -39,12 +39,16 @@ public class NavigationService implements QueryHandlerProvider {
                 Query.TASK_MENU, this::taskMenu);
     }
 
+    public void profileMenu() {
+
+    }
 
     public void taskMenu(String chatId) {
 
         String menuId = getMenuMessageId(chatId);
         String message = """
                 Меню операций с задачами. Доступные операции:
+                
                 Создать - запускает процесс создания задачи.
                 Мои задачи - постранично выводит список ваших задач.
                 Свободные задачи - выводит список свободных задач. Свободную задачу может взять любой пользователь.
@@ -57,15 +61,34 @@ public class NavigationService implements QueryHandlerProvider {
 
     }
 
+    public void profileMenu(String chatId, String userFormatted) {
+
+        String menuId = getMenuMessageId(chatId);
+        String message = "\uD83D\uDC64 <b>Ваш профиль:</b> \n\n" + userFormatted;
+
+        Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
+                keyboardProviderMap.get(KeyboardType.PROFILE_MENU).getKeyboard());
+        userStateService.setMenuId(chatId, newMenuId.toString());
+
+    }
+
 
     public void mainMenu(String chatId) {
 
         String message = """
-                Основное меню. Доступные операции:
-                Задачи - управление задачами. Создание, удаление, поиск, редактирование задач.
-                Профиль - управление профилем. Редактирование имени пользователя, смена пароля, смена email.
-                Авторизация - возврат к меню авторизации.
-                """;
+        🏠 <b>Главное меню</b>
+        Выберите доступную операцию:
+        
+        📝 <b>Задачи</b>
+        Управление задачами: создание, удаление, поиск и редактирование.
+        
+        👤 <b>Профиль</b>
+        Настройки аккаунта: смена имени пользователя, пароля и email.
+        
+        🚪 <b>Назад</b>
+        Возврат к меню авторизации.
+        """;
+
         String menuId = getMenuMessageId(chatId);
         Integer newMenuId = messageSender.editOrSendNewMessage(chatId, menuId, message,
                 keyboardProviderMap.get(KeyboardType.MAIN_MENU).getKeyboard());
@@ -77,7 +100,9 @@ public class NavigationService implements QueryHandlerProvider {
 
         String message = """
         Привет! Это бот для Task Tracker, сейчас находится в разработке.
+        
         На данный момент реализован не весь функционал. Некоторые кнопки могут не работать, а описание не соответствовать действительности.
+        
         Ссылка на репозиторий API: https://github.com/execc0/task-tracker
         Ссылка на репозиторий бота: https://github.com/execc0/task-tracker-TGBot
         """;

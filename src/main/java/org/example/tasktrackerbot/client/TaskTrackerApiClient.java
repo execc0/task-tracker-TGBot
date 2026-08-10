@@ -2,6 +2,7 @@ package org.example.tasktrackerbot.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
 import org.example.tasktrackerbot.DTO.API.request.UnlinkSocialRequest;
 import org.example.tasktrackerbot.DTO.API.request.signable.LoginAndLinkRequest;
@@ -10,6 +11,7 @@ import org.example.tasktrackerbot.DTO.API.request.signable.RegisterAndLinkReques
 import org.example.tasktrackerbot.DTO.API.response.AuthResponse;
 import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
+import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.exception.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -64,10 +66,28 @@ public class TaskTrackerApiClient {
 
     }
 
+    public UserResponse getOwnUser(String token) {
+
+        return taskTrackerRestClient.get()
+                .uri("/users/me")
+                .header("X-Internal-API-Key", internalApiKey)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiLoginException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnUser, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .body(UserResponse.class);
+
+    }
+
     public String loginAndLink(LoginAndLinkRequest request, String chatId) {
 
 
-        String token = taskTrackerRestClient.post()
+        return taskTrackerRestClient.post()
                 .uri("/auth/login-and-link")
                 .header("X-Internal-API-Key", internalApiKey)
                 .body(request)
@@ -81,10 +101,6 @@ public class TaskTrackerApiClient {
                 )
                 .body(AuthResponse.class)
                 .getToken();
-
-        log.debug("Получен токен: {}", token);
-
-        return token;
 
 
     }

@@ -107,7 +107,6 @@ public class MessageSender {
 
 
     public Integer editOrSendNewMessage(String chatId, String messageId, String message, InlineKeyboardMarkup keyboard) {
-
         try {
             if (messageId != null) {
                 return editMessage(chatId, messageId, message, keyboard);
@@ -138,6 +137,7 @@ public class MessageSender {
     }
 
     private Integer execute(SendMessage sendMessage, String chatId, boolean retrying) {
+        sendMessage.enableHtml(true);
         try {
             Message sent = telegramClient.execute(sendMessage);
             log.info("Сообщение успешно отправлено, chatId: {}, messageId: {}", chatId, sent.getMessageId());
@@ -176,6 +176,7 @@ public class MessageSender {
     }
 
     private Integer execute(EditMessageText editMessageText, String chatId, boolean retrying) {
+        editMessageText.enableHtml(true);
         try {
             telegramClient.execute(editMessageText);
             log.info("Сообщение успешно отредактировано, chatId: {}, messageId: {}", chatId, editMessageText.getMessageId());
