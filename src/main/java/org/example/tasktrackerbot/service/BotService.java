@@ -43,7 +43,6 @@ public class BotService {
     private final Map<KeyboardType, Keyboard> keyboardProviderMap;
     private final MessageDeleteScheduler messageDeleteScheduler;
     private final UserStateService userStateService;
-    private final MessageFormatter messageFormatter;
 
     public BotService(TaskTrackerApiClient taskTrackerApiClient,
                       MessageSender messageSender,
@@ -51,8 +50,7 @@ public class BotService {
                       TokenHandlerService tokenHandlerService,
                       Map<KeyboardType, Keyboard> keyboardProviderMap,
                       MessageDeleteScheduler messageDeleteScheduler,
-                      UserStateService userStateService,
-                      MessageFormatter messageFormatter) {
+                      UserStateService userStateService) {
         this.taskTrackerApiClient = taskTrackerApiClient;
         this.messageSender = messageSender;
         this.signatureService = signatureService;
@@ -60,7 +58,6 @@ public class BotService {
         this.keyboardProviderMap = keyboardProviderMap;
         this.messageDeleteScheduler = messageDeleteScheduler;
         this.userStateService = userStateService;
-        this.messageFormatter = messageFormatter;
     }
 
 

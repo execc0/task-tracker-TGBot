@@ -157,7 +157,7 @@ public class MessageSender {
             telegramClient.execute(answerCallbackQuery);
             log.info("Ответ на нажатие кнопки отправлен, callbackId: {}", answerCallbackQuery.getCallbackQueryId());
         } catch (TelegramApiException e) {
-            throw new FailToExecuteException("Не удалось погасить кнопку " + e.getMessage());
+            log.warn("Не удалось погасить кнопку: ", e);
         }
     }
 
