@@ -6,6 +6,8 @@ services:
       - .env
     depends_on:
       - redis
+    ports:
+      - "127.0.0.1:9091:9091"
     restart: unless-stopped
     networks:
       - shared-network
