@@ -40,7 +40,7 @@ public abstract class AbstractStateService {
         this.cancelKeyboard = cancelKeyboard;
     }
 
-    protected void start(String chatId, UserState nextState, String message) {
+    protected void start(String chatId, UserState nextState) {
 
         if (userStateService.getState(chatId) != UserState.NONE) {
             Integer messageToDelete = messageSender.sendMessage(chatId, "Предыдущий диалог отменён");
@@ -54,6 +54,7 @@ public abstract class AbstractStateService {
         userStateService.clearState(chatId);
         userStateService.clearTemp(chatId);
         userStateService.setState(chatId, nextState);
+        String message = nextState.getPromptText();
         String messageWithBar = buildProgressBar(nextState) + "\n" + message;
         Integer messageId = messageSender.sendKeyboardMessage(chatId, messageWithBar, cancelKeyboard.getKeyboard());
         userStateService.setTemp(chatId, "bot_message_id", messageId.toString());
@@ -96,6 +97,17 @@ public abstract class AbstractStateService {
         return request;
 
     }
+
+    protected void finishFlow(String chatId, Integer userMessageId) {
+
+        String messageToDelete = userStateService.getTempField(chatId, "bot_message_id");
+        userStateService.clearTemp(chatId);
+        userStateService.clearState(chatId);
+        scheduleMessageDelete(chatId, messageToDelete, 5);
+        deleteUserMessage(chatId, userMessageId);
+
+    }
+
 
     protected void scheduleMessageDelete(String chatId, String messageId, Integer delaySeconds) {
         messageDeleteScheduler.scheduleDelete(chatId, messageId, delaySeconds);

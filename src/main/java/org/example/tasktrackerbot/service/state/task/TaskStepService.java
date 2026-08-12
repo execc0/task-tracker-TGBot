@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.service.state;
+package org.example.tasktrackerbot.service.state.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
@@ -11,6 +11,9 @@ import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
 import org.example.tasktrackerbot.service.QueryHandlerProvider;
+import org.example.tasktrackerbot.service.state.AbstractStateService;
+import org.example.tasktrackerbot.service.state.StepHandler;
+import org.example.tasktrackerbot.service.state.StepHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +55,7 @@ public class TaskStepService extends AbstractStateService implements StepHandler
 
     public void startTaskCreation(String chatId) {
 
-        super.start(chatId, UserState.TASK_CREATE_AWAITING_TITLE, "Введите название задачи: ");
+        super.start(chatId, UserState.TASK_CREATE_AWAITING_TITLE);
 
     }
 

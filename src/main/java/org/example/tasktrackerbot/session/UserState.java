@@ -14,6 +14,11 @@ public enum UserState {
     LOGIN_AWAITING_USERNAME(1, 2, NONE, "Введите ваш username: "),
     LOGIN_AWAITING_PASSWORD(2, 2, LOGIN_AWAITING_USERNAME, "Введите пароль: "),
 
+    USER_CHANGE_AWAITING_USERNAME(1, 1, NONE, "Введите новый username: "),
+    USER_CHANGE_AWAITING_NAME(1, 1, NONE, "Введите новое имя: "),
+    USER_CHANGE_AWAITING_PASSWORD(1, 1, NONE, "Введите новый пароль: "),
+    USER_CHANGE_AWAITING_EMAIL(1, 1, NONE, "Введите новый email: "),
+
     TASK_CREATE_AWAITING_TITLE(1, 4, NONE, "Введите название задачи: "),
     TASK_CREATE_AWAITING_DESCRIPTION(2, 4, TASK_CREATE_AWAITING_TITLE, "Введите описание задачи: "),
     TASK_CREATE_AWAITING_PRIORITY(3, 4, TASK_CREATE_AWAITING_DESCRIPTION, "Выберите приоритет задачи: ",  KeyboardType.TASK_PRIORITY),

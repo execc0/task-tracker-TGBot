@@ -15,7 +15,12 @@ public enum Query {
     MAIN_MENU("menu:main"),
     TASK_MENU("menu:task"),
     USER_MENU("menu:user"),
-    PROFILE_MENU("menu:profile");
+    PROFILE_MENU("menu:profile"),
+    USER_DELETE("user:delete"),
+    UPDATE_USERNAME("user:username"),
+    UPDATE_EMAIL("user:email"),
+    UPDATE_PASSWORD("user:password"),
+    UPDATE_NAME("user:name");
 
     @Getter
     private final String callback;

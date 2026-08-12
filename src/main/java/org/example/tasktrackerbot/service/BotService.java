@@ -119,7 +119,6 @@ public class BotService {
     public UserResponse getOwnUser(String chatId) {
 
         String token = tokenHandlerService.getToken(chatId);
-
         return taskTrackerApiClient.getOwnUser(token);
 
     }
@@ -137,7 +136,45 @@ public class BotService {
 
         return pageResponse;
 
+    }
 
+    public void updateOwnUsername(String chatId, String username) {
+
+        String token = tokenHandlerService.getToken(chatId);
+        taskTrackerApiClient.updateOwnUsername(token, username);
+        tokenHandlerService.deleteToken(chatId);
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш username успешно обновлён.");
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+
+    }
+
+    public void updateOwnName(String chatId, String username) {
+
+        String token = tokenHandlerService.getToken(chatId);
+        taskTrackerApiClient.updateOwnName(token, username);
+        tokenHandlerService.deleteToken(chatId);
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваше имя успешно обновлено.");
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+
+    }
+
+    public void updateOwnEmail(String chatId, String email) {
+
+        String token = tokenHandlerService.getToken(chatId);
+        taskTrackerApiClient.updateOwnEmail(token, email);
+        tokenHandlerService.deleteToken(chatId);
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш email успешно обновлён.");
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+
+    }
+
+    public void updateOwnPassword(String chatId, String Password) {
+
+        String token = tokenHandlerService.getToken(chatId);
+        taskTrackerApiClient.updateOwnPassword(token, Password);
+        tokenHandlerService.deleteToken(chatId);
+        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш пароль успешно обновлён.");
+        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 
     }
 

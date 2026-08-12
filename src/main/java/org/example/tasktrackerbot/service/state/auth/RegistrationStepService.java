@@ -1,4 +1,4 @@
-package org.example.tasktrackerbot.service.state;
+package org.example.tasktrackerbot.service.state.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.UserRegisterRequest;
@@ -10,6 +10,9 @@ import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
 import org.example.tasktrackerbot.service.QueryHandlerProvider;
 import org.example.tasktrackerbot.service.navigation.NavigationService;
+import org.example.tasktrackerbot.service.state.AbstractStateService;
+import org.example.tasktrackerbot.service.state.StepHandler;
+import org.example.tasktrackerbot.service.state.StepHandlerProvider;
 import org.example.tasktrackerbot.session.*;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +48,7 @@ public class RegistrationStepService extends AbstractStateService implements Ste
     }
 
     public void startRegistration(String chatId) {
-        super.start(chatId, UserState.REGISTER_AWAITING_NAME, "Введите ваше имя:");
+        super.start(chatId, UserState.REGISTER_AWAITING_NAME);
     }
 
     public void handleNameStep(String chatId, String name, Integer messageId) {

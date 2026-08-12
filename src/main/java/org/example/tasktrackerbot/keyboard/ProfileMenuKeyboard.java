@@ -22,17 +22,17 @@ public class ProfileMenuKeyboard implements Keyboard {
 
         InlineKeyboardButton changeUsernameButton = InlineKeyboardButton.builder()
                 .text("✏️ Сменить username")
-                .callbackData("user:change:username")
+                .callbackData("user:username")
                 .build();
 
         InlineKeyboardButton changeNameButton = InlineKeyboardButton.builder()
                 .text("\uD83D\uDCDD Сменить имя")
-                .callbackData("user:change:name")
+                .callbackData("user:name")
                 .build();
 
         InlineKeyboardButton changePasswordButton = InlineKeyboardButton.builder()
                 .text("\uD83D\uDD11 Сменить пароль")
-                .callbackData("user:change:password")
+                .callbackData("user:password")
                 .build();
 
         InlineKeyboardButton deleteUserButton = InlineKeyboardButton.builder()
@@ -40,11 +40,16 @@ public class ProfileMenuKeyboard implements Keyboard {
                 .callbackData("user:delete")
                 .build();
 
+        InlineKeyboardButton changeEmailButton = InlineKeyboardButton.builder()
+                .text("Сменить email")
+                .callbackData("user:email")
+                .build();
+
 
         return InlineKeyboardMarkup.builder()
                 .keyboardRow(new InlineKeyboardRow(changeUsernameButton, changeNameButton))
-                .keyboardRow(new InlineKeyboardRow(changePasswordButton, deleteUserButton))
-                .keyboardRow(new InlineKeyboardRow(returnToMainMenu))
+                .keyboardRow(new InlineKeyboardRow(changePasswordButton, changeEmailButton))
+                .keyboardRow(new InlineKeyboardRow(returnToMainMenu, deleteUserButton))
                 .build();
 
 
