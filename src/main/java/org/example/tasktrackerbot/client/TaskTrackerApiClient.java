@@ -66,6 +66,69 @@ public class TaskTrackerApiClient {
 
     }
 
+    public void userDelete(String token) {
+
+        taskTrackerRestClient.delete()
+                .uri("/users/me")
+                .header("X-Internal-API-Key", internalApiKey)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiLoginException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnUser, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .toBodilessEntity();
+
+
+    }
+
+    public void updateOwnUsername(String token, String password) {
+
+        generalPatchRequest(token, "/users/me/username?username=", password);
+
+    }
+
+    public void updateOwnName(String token, String name) {
+
+        generalPatchRequest(token, "/users/me/name?name=", name);
+
+    }
+
+    public void updateOwnEmail(String token, String email) {
+
+        generalPatchRequest(token, "/users/me/email?email=", email);
+
+    }
+
+    public void updateOwnPassword(String token, String password) {
+
+        generalPatchRequest(token, "/users/me/password?password=", password);
+
+    }
+
+    private void generalPatchRequest(String token, String uri, String value) {
+
+        taskTrackerRestClient.patch()
+                .uri(uri + "{value}", value)
+                .header("X-Internal-API-Key", internalApiKey)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiLoginException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: generalPatchRequest, uri: %s, сообщение: %s",
+                                            response.getStatusCode(), uri, message));
+                        }
+                )
+                .toBodilessEntity();
+
+    }
+
+
+
     public UserResponse getOwnUser(String token) {
 
         return taskTrackerRestClient.get()
