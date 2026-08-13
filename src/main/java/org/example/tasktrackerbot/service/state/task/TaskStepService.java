@@ -2,11 +2,9 @@ package org.example.tasktrackerbot.service.state.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
-import org.example.tasktrackerbot.keyboard.CancelKeyboard;
-import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
-import org.example.tasktrackerbot.keyboard.TaskPriorityKeyboard;
-import org.example.tasktrackerbot.keyboard.TaskStatusKeyboard;
+import org.example.tasktrackerbot.keyboard.*;
 import org.example.tasktrackerbot.queries.Query;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
@@ -22,24 +20,21 @@ import java.util.Map;
 @Service
 public class TaskStepService extends AbstractStateService implements StepHandlerProvider, QueryHandlerProvider {
 
-    private final TaskPriorityKeyboard taskPriorityKeyboard;
-    private final TaskStatusKeyboard taskStatusKeyboard;
 
 
-    public TaskStepService(BotService botService,
+    public TaskStepService(BotService botCommandService,
                            MessageSender messageSender,
                            UserStateService userStateService,
                            ObjectMapper objectMapper,
-                           TaskPriorityKeyboard taskPriorityKeyboard,
-                           TaskStatusKeyboard taskStatusKeyboard,
                            MessageDeleteScheduler messageDeleteScheduler,
+                           Map<KeyboardType, Keyboard> keyboardProviderMap,
                            CancelOrReturnKeyboard cancelOrReturnKeyboard,
-                           CancelKeyboard cancelKeyboard) {
-        super(botService, messageSender, userStateService, objectMapper,
-                messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
-        this.taskPriorityKeyboard = taskPriorityKeyboard;
-        this.taskStatusKeyboard = taskStatusKeyboard;
+                           CancelKeyboard cancelKeyboard,
+                           MessageFormatter messageFormatter) {
+        super(botCommandService, messageSender, userStateService, objectMapper,
+                messageDeleteScheduler, keyboardProviderMap, cancelOrReturnKeyboard, cancelKeyboard, messageFormatter);
     }
+
 
     public Map<UserState, StepHandler> getStepHandlers() {
 
@@ -68,14 +63,14 @@ public class TaskStepService extends AbstractStateService implements StepHandler
     public void handleDescriptionStep(String chatId, String description, Integer messageId) {
 
         super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_PRIORITY, "description",
-                description, "Выберите приоритет задачи: ",taskPriorityKeyboard.getKeyboard());
+                description, "Выберите приоритет задачи: ", keyboardProviderMap.get(KeyboardType.TASK_PRIORITY).getKeyboard());
 
     }
 
     public void handlePriorityStep(String chatId, String priority, Integer messageId) {
 
         super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_STATUS, "priority",
-                priority, "Выберите статус задачи: ", taskStatusKeyboard.getKeyboard());
+                priority, "Выберите статус задачи: ", keyboardProviderMap.get(KeyboardType.TASK_STATUS).getKeyboard());
 
     }
 

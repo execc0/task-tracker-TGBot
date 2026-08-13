@@ -173,7 +173,7 @@ public class NavigationService implements QueryHandlerProvider {
 
         String tempMessageId = getTempMessageId(chatId);
 
-        String messageWithBar = buildProgressBar(previousState) + "\n" + message;
+        String messageWithBar = messageFormatter.buildProgressBar(previousState) + "\n" + message;
 
         messageSender.editOrSendNewMessage(chatId, tempMessageId, messageWithBar, keyboard);
         userStateService.setState(chatId, previousState);
@@ -189,24 +189,7 @@ public class NavigationService implements QueryHandlerProvider {
         return userStateService.getMenuId(chatId);
     }
 
-    private String buildProgressBar(UserState nextState) {
 
-        final int barLength = 5;
-
-        StringBuilder progressBar = new StringBuilder();
-
-        int totalSteps = nextState.getTotalSteps();
-        int currentStep = nextState.getCurrentStep();
-
-        int dotsToDraw = (int) Math.round((double) currentStep/totalSteps * barLength);
-
-        for (int i = 1; i <= barLength; i++) {
-            progressBar.append(i <= dotsToDraw ? "🟩" : "⬜");
-        }
-
-        return progressBar + String.format(" Шаг %d/%d", currentStep, totalSteps);
-
-    }
 
 
 

@@ -3,6 +3,7 @@ package org.example.tasktrackerbot.responder;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.DTO.Telegram.TaskResponseDTO;
+import org.example.tasktrackerbot.session.UserState;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -34,6 +35,25 @@ public class MessageFormatter {
                 "<b>Имя:</b> " + userResponse.getName() + "\n" +
                 "<b>Username:</b> " + userResponse.getUsername() + "\n" +
                 "<b>Email:</b> " + userResponse.getEmail() + "\n";
+
+    }
+
+    public String buildProgressBar(UserState state) {
+
+        final int barLength = 5;
+
+        StringBuilder progressBar = new StringBuilder();
+
+        int totalSteps = state.getTotalSteps();
+        int currentStep = state.getCurrentStep();
+
+        int dotsToDraw = (int) Math.round((double) currentStep/totalSteps * barLength);
+
+        for (int i = 1; i <= barLength; i++) {
+            progressBar.append(i <= dotsToDraw ? "🟩" : "⬜");
+        }
+
+        return progressBar + String.format(" Шаг %d/%d", currentStep, totalSteps);
 
     }
 

@@ -3,7 +3,10 @@ package org.example.tasktrackerbot.service.state.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.keyboard.Keyboard;
+import org.example.tasktrackerbot.keyboard.KeyboardType;
 import org.example.tasktrackerbot.queries.Query;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
@@ -21,14 +24,18 @@ import java.util.Map;
 @Service
 public class NameUpdateStateService extends AbstractStateService implements QueryHandlerProvider, StepHandlerProvider {
 
+
     public NameUpdateStateService(BotService botCommandService,
                                   MessageSender messageSender,
                                   UserStateService userStateService,
                                   ObjectMapper objectMapper,
                                   MessageDeleteScheduler messageDeleteScheduler,
+                                  Map<KeyboardType, Keyboard> keyboardProviderMap,
                                   CancelOrReturnKeyboard cancelOrReturnKeyboard,
-                                  CancelKeyboard cancelKeyboard) {
-        super(botCommandService, messageSender, userStateService, objectMapper, messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
+                                  CancelKeyboard cancelKeyboard,
+                                  MessageFormatter messageFormatter) {
+        super(botCommandService, messageSender, userStateService, objectMapper,
+                messageDeleteScheduler, keyboardProviderMap, cancelOrReturnKeyboard, cancelKeyboard, messageFormatter);
     }
 
     @Override

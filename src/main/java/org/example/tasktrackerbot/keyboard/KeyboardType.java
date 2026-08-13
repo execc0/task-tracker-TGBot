@@ -8,6 +8,7 @@ public enum KeyboardType {
 
     RETURN_OR_CANCEL,
     CANCEL,
+    CANCEL_OR_CONFIRM,
 
     AUTH_MENU(Query.AUTH_MENU),
     MAIN_MENU(Query.MAIN_MENU),

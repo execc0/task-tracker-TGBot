@@ -18,6 +18,7 @@ public enum UserState {
     USER_CHANGE_AWAITING_NAME(1, 1, NONE, "Введите новое имя: "),
     USER_CHANGE_AWAITING_PASSWORD(1, 1, NONE, "Введите новый пароль: "),
     USER_CHANGE_AWAITING_EMAIL(1, 1, NONE, "Введите новый email: "),
+    USER_DELETE_AWAITING_CONFIRM(1, 1, NONE, "Подтвердите удаление аккаунта: ", KeyboardType.CANCEL_OR_CONFIRM),
 
     TASK_CREATE_AWAITING_TITLE(1, 4, NONE, "Введите название задачи: "),
     TASK_CREATE_AWAITING_DESCRIPTION(2, 4, TASK_CREATE_AWAITING_TITLE, "Введите описание задачи: "),

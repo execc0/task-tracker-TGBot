@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.DTO.API.request.UserLoginRequest;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
+import org.example.tasktrackerbot.keyboard.Keyboard;
+import org.example.tasktrackerbot.keyboard.KeyboardType;
 import org.example.tasktrackerbot.queries.Query;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.service.QueryHandler;
@@ -23,16 +26,19 @@ public class LoginStepService extends AbstractStateService implements StepHandle
 
     private final NavigationService navigationService;
 
-    public LoginStepService(UserStateService userStateService,
+    public LoginStepService(BotService botCommandService,
                             MessageSender messageSender,
+                            UserStateService userStateService,
                             ObjectMapper objectMapper,
-                            BotService botService,
                             MessageDeleteScheduler messageDeleteScheduler,
+                            Map<KeyboardType, Keyboard> keyboardProviderMap,
                             CancelOrReturnKeyboard cancelOrReturnKeyboard,
-                            CancelKeyboard cancelKeyboard, NavigationService navigationService) {
-        super(botService, messageSender, userStateService, objectMapper, messageDeleteScheduler, cancelOrReturnKeyboard, cancelKeyboard);
+                            CancelKeyboard cancelKeyboard,
+                            MessageFormatter messageFormatter, NavigationService navigationService) {
+        super(botCommandService, messageSender, userStateService, objectMapper, messageDeleteScheduler, keyboardProviderMap, cancelOrReturnKeyboard, cancelKeyboard, messageFormatter);
         this.navigationService = navigationService;
     }
+
 
     @Override
     public Map<UserState, StepHandler> getStepHandlers() {

@@ -6,6 +6,7 @@ public enum Query {
 
     STATE_CANCEL("state:cancel"),
     STATE_RETURN("state:return"),
+    CONFIRM("state:confirm"),
     GET_TASKS("task:get:list"),
     CREATE_TASK("task:create"),
     LOGIN("auth:login"),

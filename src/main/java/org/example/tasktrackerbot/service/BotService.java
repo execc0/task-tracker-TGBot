@@ -108,11 +108,7 @@ public class BotService {
         String token = taskTrackerApiClient.registerAndLink(registerAndLinkRequest, chatId);
         tokenHandlerService.saveToken(chatId, token);
 
-
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Регистрация прошла успешно");
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
-
-
+        sendMessageAndDelete(chatId, "Регистрация прошла успешно.");
 
     }
 
@@ -143,8 +139,7 @@ public class BotService {
         String token = tokenHandlerService.getToken(chatId);
         taskTrackerApiClient.updateOwnUsername(token, username);
         tokenHandlerService.deleteToken(chatId);
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш username успешно обновлён.");
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, "Ваш username успешно обновлён.");
 
     }
 
@@ -153,8 +148,7 @@ public class BotService {
         String token = tokenHandlerService.getToken(chatId);
         taskTrackerApiClient.updateOwnName(token, username);
         tokenHandlerService.deleteToken(chatId);
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваше имя успешно обновлено.");
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, "Ваше имя успешно обновлено.");
 
     }
 
@@ -163,8 +157,7 @@ public class BotService {
         String token = tokenHandlerService.getToken(chatId);
         taskTrackerApiClient.updateOwnEmail(token, email);
         tokenHandlerService.deleteToken(chatId);
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш email успешно обновлён.");
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, "Ваш email успешно обновлён.");
 
     }
 
@@ -173,8 +166,19 @@ public class BotService {
         String token = tokenHandlerService.getToken(chatId);
         taskTrackerApiClient.updateOwnPassword(token, Password);
         tokenHandlerService.deleteToken(chatId);
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш пароль успешно обновлён.");
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, "Ваш пароль успешно обновлён");
+
+    }
+
+    public void deleteOwnUser(String chatId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        taskTrackerApiClient.userDelete(token);
+
+        tokenHandlerService.deleteToken(chatId);
+
+        sendMessageAndDelete(chatId, "Ваш аккаунт успешно удалён.");
 
     }
 
@@ -184,10 +188,7 @@ public class BotService {
 
         taskTrackerApiClient.createOwnTask(request, token);
 
-        Integer sentMessageId = messageSender.sendMessage(chatId, String.format("Задача с названием %s успешно создана",
-                request.getTitle()));
-
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, String.format("Задача с названием %s успешно создана", request.getTitle()));
 
     }
 
@@ -209,9 +210,7 @@ public class BotService {
 
         tokenHandlerService.saveToken(chatId, token);
 
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Авторизация прошла успешно");
-
-        messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
+        sendMessageAndDelete(chatId, "Авторизация прошла успешно");
 
     }
 
@@ -225,11 +224,19 @@ public class BotService {
 
         tokenHandlerService.deleteToken(chatId); // на случай ре-авторизации
 
-        Integer sentMessageId = messageSender.sendMessage(chatId, "Ваш аккаунт успешно отвязан");
+        sendMessageAndDelete(chatId, "Ваш аккаунт успешно отвязан");
+
+    }
+
+    private void sendMessageAndDelete(String chatId, String message) {
+
+        Integer sentMessageId = messageSender.sendMessage(chatId, message);
 
         messageDeleteScheduler.scheduleDelete(chatId, sentMessageId.toString(), 10);
 
-
     }
+
+
+
 
 }

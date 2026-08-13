@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.tasktrackerbot.keyboard.CancelKeyboard;
 import org.example.tasktrackerbot.keyboard.CancelOrReturnKeyboard;
 import org.example.tasktrackerbot.keyboard.Keyboard;
+import org.example.tasktrackerbot.keyboard.KeyboardType;
+import org.example.tasktrackerbot.responder.MessageFormatter;
 import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.MessageDeleteScheduler;
@@ -11,6 +13,7 @@ import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
+import java.security.Key;
 import java.util.Map;
 
 public abstract class AbstractStateService {
@@ -21,23 +24,29 @@ public abstract class AbstractStateService {
     protected final UserStateService userStateService;
     protected final ObjectMapper objectMapper;
     protected final MessageDeleteScheduler messageDeleteScheduler;
+    protected final Map<KeyboardType, Keyboard> keyboardProviderMap;
     protected final CancelOrReturnKeyboard cancelOrReturnKeyboard;
     protected final CancelKeyboard cancelKeyboard;
+    protected final MessageFormatter messageFormatter;
 
     public AbstractStateService(BotService botCommandService,
                                 MessageSender messageSender,
                                 UserStateService userStateService,
                                 ObjectMapper objectMapper,
                                 MessageDeleteScheduler messageDeleteScheduler,
+                                Map<KeyboardType, Keyboard> keyboardProviderMap,
                                 CancelOrReturnKeyboard cancelOrReturnKeyboard,
-                                CancelKeyboard cancelKeyboard) {
+                                CancelKeyboard cancelKeyboard,
+                                MessageFormatter messageFormatter) {
         this.botService = botCommandService;
         this.messageSender = messageSender;
         this.userStateService = userStateService;
         this.objectMapper = objectMapper;
         this.messageDeleteScheduler = messageDeleteScheduler;
+        this.keyboardProviderMap = keyboardProviderMap;
         this.cancelOrReturnKeyboard = cancelOrReturnKeyboard;
         this.cancelKeyboard = cancelKeyboard;
+        this.messageFormatter = messageFormatter;
     }
 
     protected void start(String chatId, UserState nextState) {
@@ -54,9 +63,14 @@ public abstract class AbstractStateService {
         userStateService.clearState(chatId);
         userStateService.clearTemp(chatId);
         userStateService.setState(chatId, nextState);
+
         String message = nextState.getPromptText();
-        String messageWithBar = buildProgressBar(nextState) + "\n" + message;
-        Integer messageId = messageSender.sendKeyboardMessage(chatId, messageWithBar, cancelKeyboard.getKeyboard());
+        String messageWithBar = messageFormatter.buildProgressBar(nextState) + "\n" + message;
+        InlineKeyboardMarkup keyboard = cancelKeyboard.getKeyboard();
+        if (nextState.getKeyboardType() != null) {
+            keyboard = keyboardProviderMap.get(nextState.getKeyboardType()).getKeyboard();
+        }
+        Integer messageId = messageSender.sendKeyboardMessage(chatId, messageWithBar, keyboard);
         userStateService.setTemp(chatId, "bot_message_id", messageId.toString());
 
     }
@@ -66,7 +80,7 @@ public abstract class AbstractStateService {
         userStateService.setState(chatId, nextState);
         userStateService.setTemp(chatId, key, input);
         String messageId = userStateService.getTempField(chatId, "bot_message_id");
-        String messageWithBar = buildProgressBar(nextState) + "\n" + message;
+        String messageWithBar = messageFormatter.buildProgressBar(nextState) + "\n" + message;
         messageSender.editOrSendNewMessage(chatId, messageId, messageWithBar, cancelOrReturnKeyboard.getKeyboard());
         deleteUserMessage(chatId, userMessageId);
     }
@@ -78,7 +92,7 @@ public abstract class AbstractStateService {
         userStateService.setState(chatId, nextState);
         userStateService.setTemp(chatId, key, input);
         String messageId = userStateService.getTempField(chatId, "bot_message_id");
-        String messageWithBar = buildProgressBar(nextState) + "\n" + message;
+        String messageWithBar = messageFormatter.buildProgressBar(nextState) + "\n" + message;
         messageSender.editMessage(chatId, messageId, messageWithBar, keyboard);
         deleteUserMessage(chatId, userMessageId);
     }
@@ -124,23 +138,5 @@ public abstract class AbstractStateService {
         }
     }
 
-    private String buildProgressBar(UserState nextState) {
-
-        final int barLength = 5;
-
-        StringBuilder progressBar = new StringBuilder();
-
-        int totalSteps = nextState.getTotalSteps();
-        int currentStep = nextState.getCurrentStep();
-
-        int dotsToDraw = (int) Math.round((double) currentStep/totalSteps * barLength);
-
-        for (int i = 1; i <= barLength; i++) {
-            progressBar.append(i <= dotsToDraw ? "🟩" : "⬜");
-        }
-
-        return progressBar + String.format(" Шаг %d/%d", currentStep, totalSteps);
-
-    }
 
 }
