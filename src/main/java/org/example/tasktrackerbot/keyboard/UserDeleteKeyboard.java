@@ -18,12 +18,12 @@ public class UserDeleteKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton cancelButton = InlineKeyboardButton.builder()
-                .text("Отмена")
+                .text("❌ Отмена")
                 .callbackData(Query.STATE_CANCEL.getCallback())
                 .build();
 
         InlineKeyboardButton confirmButton = InlineKeyboardButton.builder()
-                .text("Подтвердить")
+                .text("✅ Подтвердить")
                 .callbackData(Query.CONFIRM.getCallback())
                 .build();
 

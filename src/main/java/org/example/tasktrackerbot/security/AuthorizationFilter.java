@@ -16,7 +16,7 @@ public class AuthorizationFilter {
     private final BotService botService;
     private final UserStateService userStateService;
     private static final Set<String> QUERIES_REQUIRE_NO_AUTH = Set.of("auth:login", "auth:register");
-    private static final Set<String> QUERIES_NEED_NO_AUTH = Set.of( "state:cancel", "state:return");
+    private static final Set<String> QUERIES_NEED_NO_AUTH = Set.of("state:cancel", "state:return", "menu:start", "menu:main");
     private static final Set<String> COMMANDS_REQUIRE_NO_AUTH = Set.of("/login", "/register");
     private static final Set<UserState> STATES_NEED_NO_AUTH = Set.of(
             UserState.LOGIN_AWAITING_USERNAME, UserState.LOGIN_AWAITING_PASSWORD,

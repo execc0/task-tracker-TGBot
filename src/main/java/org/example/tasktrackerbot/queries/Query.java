@@ -23,9 +23,13 @@ public enum Query {
     UPDATE_PASSWORD("user:password"),
     UPDATE_NAME("user:name");
 
+    // STATUS_TODO,
+    // STATUS_IN_PROGRESS,
+    // STATUS_DONE;
+
     @Getter
     private final String callback;
-
+//  private final String input;
     Query(String callback) {
         this.callback = callback;
     }

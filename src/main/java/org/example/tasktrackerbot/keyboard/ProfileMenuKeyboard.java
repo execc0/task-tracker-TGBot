@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.keyboard;
 
+import org.example.tasktrackerbot.queries.Query;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -22,26 +23,26 @@ public class ProfileMenuKeyboard implements Keyboard {
 
         InlineKeyboardButton changeUsernameButton = InlineKeyboardButton.builder()
                 .text("✏️ Сменить username")
-                .callbackData("user:username")
+                .callbackData(Query.UPDATE_USERNAME.getCallback())
                 .build();
 
         InlineKeyboardButton changeNameButton = InlineKeyboardButton.builder()
                 .text("\uD83D\uDCDD Сменить имя")
-                .callbackData("user:name")
+                .callbackData(Query.UPDATE_NAME.getCallback())
                 .build();
 
         InlineKeyboardButton changePasswordButton = InlineKeyboardButton.builder()
                 .text("\uD83D\uDD11 Сменить пароль")
-                .callbackData("user:password")
+                .callbackData(Query.UPDATE_PASSWORD.getCallback())
                 .build();
 
         InlineKeyboardButton deleteUserButton = InlineKeyboardButton.builder()
-                .text("❌ Удалить пользователя")
-                .callbackData("user:delete")
+                .text("\uD83D\uDDD1\uFE0F Удалить пользователя")
+                .callbackData(Query.USER_DELETE.getCallback())
                 .build();
 
         InlineKeyboardButton changeEmailButton = InlineKeyboardButton.builder()
-                .text("Сменить email")
+                .text("\uD83D\uDCE7 Сменить email")
                 .callbackData("user:email")
                 .build();
 
