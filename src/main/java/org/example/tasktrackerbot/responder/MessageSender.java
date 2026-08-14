@@ -192,7 +192,7 @@ public class MessageSender {
             return editMessageText.getMessageId();
         }  catch (TelegramApiException e) {
             if (e instanceof TelegramApiRequestException requestException && messageIsUnmodifiable(requestException)) {
-                throw new UnmodifiableMessageException("Редактируемое сообщение идентично оригинальному");
+                throw new UnmodifiableMessageException("Редактируемое сообщение идентично оригинальному" + requestException);
             }
             if (e instanceof TelegramApiRequestException requestException && isRetriable(requestException, retrying)) {
                 Integer retryAfter = requestException.getParameters().getRetryAfter();

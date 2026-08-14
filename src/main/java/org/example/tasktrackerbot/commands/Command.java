@@ -9,7 +9,7 @@ public enum Command {
     REGISTER("/register", Query.REGISTER.getCallback()),
     MENU("/menu", Query.MAIN_MENU.getCallback()),
     UNLINK("/unlink", Query.UNLINK.getCallback()),
-    START("/start", Query.AUTH_MENU.getCallback());
+    START("/start", Query.START_MENU.getCallback());
 
     @Getter
     private final String commandText;

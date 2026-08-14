@@ -45,12 +45,13 @@ public class NavigationService implements QueryHandlerProvider {
         return Map.of(Query.STATE_CANCEL, this::cancel,
                 Query.STATE_RETURN, this::returnToPreviousStep,
                 Query.MAIN_MENU, this::mainMenu,
-                Query.AUTH_MENU, this::startMenu,
+                Query.AUTH_MENU, this::authMenu,
                 Query.TASK_MENU, this::taskMenu,
                 Query.GET_TASKS, this::taskListMenu,
                 Query.USER_MENU, this::profileMenu,
                 Query.TASKS_PREV_PAGE, this::getPreviousTaskPage,
-                Query.TASKS_NEXT_PAGE, this::getNextTaskPage);
+                Query.TASKS_NEXT_PAGE, this::getNextTaskPage,
+                Query.START_MENU, this::startMenu);
     }
 
 
@@ -150,6 +151,21 @@ public class NavigationService implements QueryHandlerProvider {
 
     public void startMenu(String chatId) {
 
+        String message = """
+        Привет! Это бот для Task Tracker, сейчас находится в разработке.
+        
+        На данный момент реализован не весь функционал. Некоторые кнопки могут не работать, а описание не соответствовать действительности.
+        
+        Ссылка на репозиторий API: https://github.com/execc0/task-tracker
+        Ссылка на репозиторий бота: https://github.com/execc0/task-tracker-TGBot
+        """;
+        Integer menuId = messageSender.sendKeyboardMessage(chatId, message,
+                keyboardProviderMap.get(KeyboardType.AUTH_MENU).getKeyboard());
+        userStateService.setMenuId(chatId, menuId.toString());
+
+    }
+
+    public void authMenu(String chatId) {
         String message = """
         Привет! Это бот для Task Tracker, сейчас находится в разработке.
         

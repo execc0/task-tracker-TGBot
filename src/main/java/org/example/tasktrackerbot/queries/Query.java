@@ -17,7 +17,8 @@ public enum Query {
     UNLINK("auth:unlink"),
     REGISTER("auth:register"),
 
-    AUTH_MENU("menu:start"),
+    START_MENU("menu:start"),
+    AUTH_MENU("menu:auth"),
     MAIN_MENU("menu:main"),
     TASK_MENU("menu:task"),
     USER_MENU("menu:user"),

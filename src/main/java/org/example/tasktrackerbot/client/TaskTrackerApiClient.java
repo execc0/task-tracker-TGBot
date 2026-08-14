@@ -195,7 +195,8 @@ public class TaskTrackerApiClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
                             String message = extractErrorMessage(response);
-                            throw new ApiLoginException("Необходима авторизация. Для начала работы введите команду /start",
+                            throw new ApiLoginException("Необходима авторизация." +
+                                    " Для начала работы авторизуйтесь, используя /register или /login, или введите /start",
                                     String.format("Ошибка при вызове API, StatusCode: %s метод: loginByChatId, сообщение: %s",
                                             response.getStatusCode(), message));
                         }
