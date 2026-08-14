@@ -2,6 +2,7 @@ package org.example.tasktrackerbot.security;
 
 import org.example.tasktrackerbot.exception.ApiLoginException;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
+import org.example.tasktrackerbot.responder.MessageSender;
 import org.example.tasktrackerbot.service.BotService;
 import org.example.tasktrackerbot.session.UserState;
 import org.example.tasktrackerbot.session.UserStateService;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Service
 public class AuthorizationFilter {
 
+    private final MessageSender messageSender;
     private final BotService botService;
     private final UserStateService userStateService;
     private static final Set<String> QUERIES_REQUIRE_NO_AUTH = Set.of("auth:login", "auth:register");
@@ -24,7 +26,8 @@ public class AuthorizationFilter {
             UserState.REGISTER_AWAITING_EMAIL, UserState.REGISTER_AWAITING_PASSWORD
     );
 
-    public AuthorizationFilter(BotService botService, UserStateService userStateService) {
+    public AuthorizationFilter(MessageSender messageSender, BotService botService, UserStateService userStateService) {
+        this.messageSender = messageSender;
         this.botService = botService;
         this.userStateService = userStateService;
     }
@@ -80,6 +83,7 @@ public class AuthorizationFilter {
         if (command.equals("/start")) return;
         if(COMMANDS_REQUIRE_NO_AUTH.contains(command)) {
             if (isAuthorized(chatId)) {
+                messageSender.deleteMessage(chatId, update.getMessage().getMessageId().toString());
                 throw new UserAlreadyAuthorizedException("Вы уже авторизованы. Сначала отвяжите текущий аккаунт командой /unlink",
                         String.format("Ошибка при вводе команды chatId: %s command: %s", command, chatId));
             }

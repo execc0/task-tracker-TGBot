@@ -31,10 +31,16 @@ public class BotCallbackQueryDispatcher {
 
     public void dispatchCallbackQuery(Update update, String chatId) {
 
+        log.info("Получено нажатие на кнопку из Telegram chatId: {} query: {}", chatId, update.getCallbackQuery().getData());
 
         String query = update.getCallbackQuery().getData();
         String callBackQueryId = update.getCallbackQuery().getId();
-        log.info("Получено нажатие на кнопку из Telegram chatId: {} query: {}", chatId, query);
+
+        dispatchCallbackQuery(query, chatId, callBackQueryId);
+
+    }
+
+    public void dispatchCallbackQuery(String query, String chatId, String callBackQueryId) {
 
         // Обработка нажатий на кнопки (навигация или начало новой цепочки диалога)
         if (queryHandlerMap.containsKey(query)) {
@@ -42,7 +48,6 @@ public class BotCallbackQueryDispatcher {
             messageSender.answerCallback(callBackQueryId);
             return;
         }
-
 
         // Иначе: операция связана с вводом состояния, передаем в stepHandlerDispatcher
         String value = query.split(":")[1];

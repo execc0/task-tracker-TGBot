@@ -85,6 +85,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
             transaction.setTag("chat_id", chatId);
         } catch (Exception e) {
             exceptionHandler.handle(chatId, e, transaction);
+            return;
         }
 
         // Получаем или создаем лок для конкретного chatId
@@ -93,33 +94,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
         try {
 
             authorizationFilter.filter(update, chatId);
-
-            // Callback - обработка нажатий на кнопки
-            if (update.hasCallbackQuery()) {
-                transaction.setName("Telegram callback: " + update.getCallbackQuery().getData());
-                callbackQueryDispatcher.dispatchCallbackQuery(update, chatId);
-                return;
-            }
-
-            // Если нет текста и не было нажатия на кнопку - проблема
-            if (!update.getMessage().hasText()) {
-                throw new InvalidCommandInputException("Текст сообщения пуст",
-                        String.format("Сообщение chatId: %s не имеет текста", chatId));
-            }
-            log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
-
-            // State - обработка ввода после нажатия на кнопку
-            if(userStateService.getState(chatId) != UserState.NONE) {
-                String input = update.getMessage().getText();
-                transaction.setName("Telegram state input");
-                stepHandlerDispatcher.dispatchStateInput(input, chatId, update.getMessage().getMessageId());
-                return;
-            }
-
-            // Обработка обычных команд
-            String command = parseCommand(update);
-            transaction.setName("Telegram command input: " + command);
-            commandDispatcher.dispatchCommand(update, command, chatId);
+            routeUpdate(update, transaction, chatId);
 
         } catch (Exception exception) {
             exceptionHandler.handle(chatId, exception, transaction);
@@ -129,6 +104,36 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
 
     }
 
+    private void routeUpdate(Update update, ITransaction transaction, String chatId) {
+
+        // Callback - обработка нажатий на кнопки
+        if (update.hasCallbackQuery()) {
+            transaction.setName("Telegram callback: " + update.getCallbackQuery().getData());
+            callbackQueryDispatcher.dispatchCallbackQuery(update, chatId);
+            return;
+        }
+
+        // Если нет текста и не было нажатия на кнопку - проблема
+        if (!update.getMessage().hasText()) {
+            throw new InvalidCommandInputException("Текст сообщения пуст",
+                    String.format("Сообщение chatId: %s не имеет текста", chatId));
+        }
+        log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
+
+        // State - обработка ввода после нажатия на кнопку
+        if(userStateService.getState(chatId) != UserState.NONE) {
+            String input = update.getMessage().getText();
+            transaction.setName("Telegram state input");
+            stepHandlerDispatcher.dispatchStateInput(input, chatId, update.getMessage().getMessageId());
+            return;
+        }
+
+        // Обработка обычных команд
+        String command = parseCommand(update);
+        transaction.setName("Telegram command input: " + command);
+        commandDispatcher.dispatchCommand(update, command, chatId);
+
+    }
 
     private String extractChatId(Update update) {
         if (update.hasMessage()) {

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.example.tasktrackerbot.exception.BotException;
 import org.example.tasktrackerbot.exception.FailToExecuteException;
 import org.example.tasktrackerbot.exception.NullMessageException;
+import org.example.tasktrackerbot.exception.UnmodifiableMessageException;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -112,13 +113,21 @@ public class MessageSender {
                 return editMessage(chatId, messageId, message, keyboard);
             }
             throw new NullPointerException("Попытка отредактировать сообщение при messageId == null");
-        } catch (Exception e) {
+        } catch (UnmodifiableMessageException exc) {
+            throw exc;
+        }
+        catch (Exception e) {
             return sendKeyboardMessage(chatId, message, keyboard);
         }
 
     }
 
     public void answerCallback(String callBackQueryId) {
+
+        if (callBackQueryId == null) {
+            return;
+        }
+
         AnswerCallbackQuery answerCallbackQuery = AnswerCallbackQuery.builder()
                 .callbackQueryId(callBackQueryId)
                 .build();
@@ -182,6 +191,9 @@ public class MessageSender {
             log.info("Сообщение успешно отредактировано, chatId: {}, messageId: {}", chatId, editMessageText.getMessageId());
             return editMessageText.getMessageId();
         }  catch (TelegramApiException e) {
+            if (e instanceof TelegramApiRequestException requestException && messageIsUnmodifiable(requestException)) {
+                throw new UnmodifiableMessageException("Редактируемое сообщение идентично оригинальному");
+            }
             if (e instanceof TelegramApiRequestException requestException && isRetriable(requestException, retrying)) {
                 Integer retryAfter = requestException.getParameters().getRetryAfter();
                 sleepSilent(retryAfter*1000);
@@ -198,6 +210,10 @@ public class MessageSender {
             log.error("Прерван сон потока {} ", Thread.currentThread().getName());
         }
 
+    }
+
+    private boolean messageIsUnmodifiable(TelegramApiRequestException requestException) {
+       return requestException.getApiResponse().contains("message is not modified");
     }
 
     private boolean isRetriable(TelegramApiRequestException exception, boolean retrying) {
