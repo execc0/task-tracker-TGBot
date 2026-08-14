@@ -3,6 +3,7 @@ package org.example.tasktrackerbot.service.navigation;
 import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.DTO.API.response.UserResponse;
+import org.example.tasktrackerbot.exception.PageNumberException;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
 import org.example.tasktrackerbot.queries.Query;
@@ -47,7 +48,9 @@ public class NavigationService implements QueryHandlerProvider {
                 Query.AUTH_MENU, this::startMenu,
                 Query.TASK_MENU, this::taskMenu,
                 Query.GET_TASKS, this::taskListMenu,
-                Query.USER_MENU, this::profileMenu);
+                Query.USER_MENU, this::profileMenu,
+                Query.TASKS_PREV_PAGE, this::getPreviousTaskPage,
+                Query.TASKS_NEXT_PAGE, this::getNextTaskPage);
     }
 
 
@@ -69,11 +72,34 @@ public class NavigationService implements QueryHandlerProvider {
 
     }
 
+    public void getNextTaskPage(String chatId) {
+        int previousPage = Integer.parseInt(userStateService.getPageNum(chatId));
+        userStateService.setPageNum(chatId, previousPage + 1);
+        try {
+            taskListMenu(chatId);
+        } catch (PageNumberException e) {
+            userStateService.setPageNum(chatId, previousPage);
+            throw e;
+        }
+    }
+
+    public void getPreviousTaskPage(String chatId) {
+        int previousPage = Integer.parseInt(userStateService.getPageNum(chatId));
+        if (previousPage > 0) {
+            userStateService.setPageNum(chatId, previousPage - 1);
+            taskListMenu(chatId);
+        }
+    }
+
     public void taskListMenu(String chatId) {
 
-        PageResponseDTO<TaskResponse> pageResponse = botService.getOwnTasks(chatId);
+        String pageNum = userStateService.getPageNum(chatId);
 
-        String tasksFormatted = messageFormatter.formatTaskDTOList(pageResponse.getContent());
+        PageResponseDTO<TaskResponse> pageResponse = botService.getOwnTasks(chatId, pageNum);
+
+        userStateService.setPageNum(chatId, pageResponse.getCurrentPage());
+
+        String tasksFormatted = messageFormatter.buildTaskPage(pageResponse);
 
         String menuId = userStateService.getMenuId(chatId);
 

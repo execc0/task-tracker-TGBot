@@ -13,6 +13,7 @@ import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.client.TaskTrackerApiClient;
 import org.example.tasktrackerbot.exception.NotFoundException;
+import org.example.tasktrackerbot.exception.PageNumberException;
 import org.example.tasktrackerbot.exception.UserAlreadyAuthorizedException;
 import org.example.tasktrackerbot.keyboard.Keyboard;
 import org.example.tasktrackerbot.keyboard.KeyboardType;
@@ -119,15 +120,20 @@ public class BotService {
 
     }
 
-    public PageResponseDTO<TaskResponse> getOwnTasks(String chatId) {
+    public PageResponseDTO<TaskResponse> getOwnTasks(String chatId, String pageNum) {
 
         String token = tokenHandlerService.getToken(chatId);
 
-        PageResponseDTO<TaskResponse> pageResponse = taskTrackerApiClient.getOwnTasks(token);
+        PageResponseDTO<TaskResponse> pageResponse = taskTrackerApiClient.getOwnTasks(token, pageNum);
 
         if (pageResponse.getContent().isEmpty()) {
-            throw new NotFoundException("Список ваших задач пуст. Попробуйте создать новую задачу.",
-                    String.format("Ошибка при вызове метода getOwnTasks chatId: %s список задач пуст.", chatId));
+            if (pageNum.equals("0")) {
+                throw new NotFoundException("Список ваших задач пуст. Попробуйте создать новую задачу.",
+                        String.format("Ошибка при вызове метода getOwnTasks chatId: %s список задач пуст.", chatId));
+            }
+            throw new PageNumberException("Ошибка! Это последняя страница вашего списка задач.",
+                    String.format("Ошибка при вызове метода getOwnTasks chatId: %s" +
+                            " попытка получить доступ к несуществующей странице.", chatId));
         }
 
         return pageResponse;

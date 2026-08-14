@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.responder;
 
+import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.DTO.API.response.UserResponse;
 import org.example.tasktrackerbot.DTO.Telegram.TaskResponseDTO;
@@ -10,6 +11,9 @@ import java.util.List;
 
 @Component
 public class MessageFormatter {
+
+    private final String TASK_COUNT_LIMIT = "20";
+    private final Integer ELEMENTS_ON_PAGE = 5;
 
     public String formatTaskDTO(TaskResponse taskResponse) {
 
@@ -26,6 +30,17 @@ public class MessageFormatter {
         return taskResponseList.stream()
                 .map(response -> formatTaskDTO(response))
                 .reduce("", (acc, response) -> acc + response);
+
+    }
+
+    public String buildTaskPage(PageResponseDTO<TaskResponse> pageResponse) {
+        Integer currentTaskCount = pageResponse.getContent().size();
+        Integer currentPage = pageResponse.getCurrentPage();
+        String header = "У вас задач: " + pageResponse.getTotalElements() + "/" + TASK_COUNT_LIMIT + '\n' +
+                "Показаны задачи " + (currentPage*ELEMENTS_ON_PAGE + 1) + "-" + ((currentPage)*ELEMENTS_ON_PAGE + currentTaskCount) + "\n\n";
+        String tasksFormatted = formatTaskDTOList(pageResponse.getContent());
+
+        return header+tasksFormatted;
 
     }
 

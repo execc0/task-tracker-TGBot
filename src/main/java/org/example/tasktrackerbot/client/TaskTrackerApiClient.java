@@ -226,10 +226,10 @@ public class TaskTrackerApiClient {
 
     }
 
-    public PageResponseDTO<TaskResponse> getOwnTasks(String token) {
+    public PageResponseDTO<TaskResponse> getOwnTasks(String token, String pageNum) {
 
         return taskTrackerRestClient.get()
-                .uri("tasks/my")
+                .uri("tasks/my?page={page}", pageNum)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .header("X-Internal-API-Key", internalApiKey)
                 .retrieve()

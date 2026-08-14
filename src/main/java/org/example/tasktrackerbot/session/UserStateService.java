@@ -30,6 +30,10 @@ public class UserStateService {
         return "user:menu:" + chatId;
     }
 
+    public String buildPageKey(String chatId) {
+        return "user:tasks:page:" + chatId;
+    }
+
     public UserState getState(String chatId) {
         String state = stringRedisTemplate.opsForValue().get(buildStateKey(chatId));
         if (state != null && !state.isEmpty()) {
@@ -53,6 +57,10 @@ public class UserStateService {
         stringRedisTemplate.expire(buildTempKey(chatId), STATE_TTL);
     }
 
+    public void setPageNum(String chatId, Integer pageNum) {
+        stringRedisTemplate.opsForValue().set(buildPageKey(chatId), pageNum.toString());
+    }
+
     public String getMenuId(String chatId) {
         return stringRedisTemplate.opsForValue().get(buildMenuKey(chatId));
     }
@@ -63,6 +71,15 @@ public class UserStateService {
             return null;
         }
         return objValue.toString();
+    }
+
+    public String getPageNum(String chatId) {
+
+        String pageNum = stringRedisTemplate.opsForValue().get(buildPageKey(chatId));
+        if (pageNum == null) {
+            return String.valueOf(0);
+        }
+        return pageNum;
     }
 
     public Map<Object, Object> getAllTempFields(String chatId) {
@@ -76,6 +93,10 @@ public class UserStateService {
 
     public void clearTemp(String chatId) {
         stringRedisTemplate.delete(buildTempKey(chatId));
+    }
+
+    public void clearPageNum(String chatId) {
+        stringRedisTemplate.delete(buildPageKey(chatId));
     }
 
 

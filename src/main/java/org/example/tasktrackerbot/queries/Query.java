@@ -9,6 +9,8 @@ public enum Query {
     CONFIRM("state:confirm"),
     GET_TASKS("task:get:list"),
     CREATE_TASK("task:create"),
+    TASKS_NEXT_PAGE("tasks:next"),
+    TASKS_PREV_PAGE("tasks:previous"),
     LOGIN("auth:login"),
     UNLINK("auth:unlink"),
     REGISTER("auth:register"),
