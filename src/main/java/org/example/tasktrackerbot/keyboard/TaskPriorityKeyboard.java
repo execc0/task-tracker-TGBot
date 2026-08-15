@@ -16,17 +16,17 @@ public class TaskPriorityKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton TODOButton = InlineKeyboardButton.builder()
-                .text("LOW")
+                .text("\uD83D\uDFE2 LOW")
                 .callbackData("priority:LOW")
                 .build();
 
         InlineKeyboardButton inProgressButton = InlineKeyboardButton.builder()
-                .text("MEDIUM")
+                .text("⚠️ MEDIUM")
                 .callbackData("priority:MEDIUM")
                 .build();
 
         InlineKeyboardButton doneButton = InlineKeyboardButton.builder()
-                .text("HIGH")
+                .text("\uD83D\uDD25 HIGH")
                 .callbackData("priority:HIGH")
                 .build();
 

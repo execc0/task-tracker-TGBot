@@ -17,22 +17,22 @@ public class AuthKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton loginButton = InlineKeyboardButton.builder()
-                .text("Вход")
+                .text("\uD83D\uDD11 Вход")
                 .callbackData(Query.LOGIN.getCallback())
                 .build();
 
         InlineKeyboardButton registerButton = InlineKeyboardButton.builder()
-                .text("Регистрация")
+                .text("\uD83D\uDCDD Регистрация")
                 .callbackData(Query.REGISTER.getCallback())
                 .build();
 
         InlineKeyboardButton unlinkButton = InlineKeyboardButton.builder()
-                .text("Отвязать")
+                .text("\uD83D\uDD12 Отвязать")
                 .callbackData(Query.UNLINK.getCallback())
                 .build();
 
         InlineKeyboardButton menuButton = InlineKeyboardButton.builder()
-                .text("Основное меню")
+                .text("\uD83C\uDFE0 Основное меню")
                 .callbackData(KeyboardType.MAIN_MENU.getCallback())
                 .build();
 

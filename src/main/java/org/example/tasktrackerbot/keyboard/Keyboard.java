@@ -14,12 +14,12 @@ public interface Keyboard {
     public default InlineKeyboardRow getCancelOrReturnRow() {
 
         InlineKeyboardButton returnButton = InlineKeyboardButton.builder()
-                .text("Назад")
+                .text("⬅️ Назад")
                 .callbackData(Query.STATE_RETURN.getCallback())
                 .build();
 
         InlineKeyboardButton cancelButton = InlineKeyboardButton.builder()
-                .text("Отмена")
+                .text("⛔ Отмена")
                 .callbackData(Query.STATE_CANCEL.getCallback())
                 .build();
 

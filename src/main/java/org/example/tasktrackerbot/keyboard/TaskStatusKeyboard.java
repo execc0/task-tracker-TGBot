@@ -16,17 +16,17 @@ public class TaskStatusKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton TODOButton = InlineKeyboardButton.builder()
-                .text("TODO")
+                .text("⏳ TODO")
                 .callbackData("status:TODO")
                 .build();
 
         InlineKeyboardButton inProgressButton = InlineKeyboardButton.builder()
-                .text("IN_PROGRESS")
+                .text("\uD83D\uDD04 IN_PROGRESS")
                 .callbackData("status:IN_PROGRESS")
                 .build();
 
         InlineKeyboardButton doneButton = InlineKeyboardButton.builder()
-                .text("DONE")
+                .text("✅ DONE")
                 .callbackData("status:DONE")
                 .build();
 

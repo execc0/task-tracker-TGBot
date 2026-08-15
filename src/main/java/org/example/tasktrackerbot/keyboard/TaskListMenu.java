@@ -19,7 +19,7 @@ public class TaskListMenu implements Keyboard {
 
 
         InlineKeyboardButton returnToTaskMenu = InlineKeyboardButton.builder()
-                .text("Назад")
+                .text("⬅️ Назад")
                 .callbackData(KeyboardType.TASK_MENU.getCallback())
                 .build();
 

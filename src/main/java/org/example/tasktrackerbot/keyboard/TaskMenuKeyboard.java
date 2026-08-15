@@ -16,17 +16,17 @@ public class TaskMenuKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton returnToMainMenu = InlineKeyboardButton.builder()
-                .text("Назад")
+                .text("⬅️ Назад")
                 .callbackData(KeyboardType.MAIN_MENU.getCallback())
                 .build();
 
         InlineKeyboardButton createTaskButton = InlineKeyboardButton.builder()
-                .text("Создать задачу")
+                .text("➕ Создать задачу")
                 .callbackData(Query.CREATE_TASK.getCallback())
                 .build();
 
         InlineKeyboardButton getOwnTasksButton = InlineKeyboardButton.builder()
-                .text("Мои задачи")
+                .text("\uD83D\uDCCB Мои задачи")
                 .callbackData(Query.GET_TASKS.getCallback())
                 .build();
 

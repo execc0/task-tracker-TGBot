@@ -18,7 +18,7 @@ public class CancelKeyboard implements Keyboard {
     public InlineKeyboardMarkup getKeyboard() {
 
         InlineKeyboardButton cancelButton = InlineKeyboardButton.builder()
-                .text("Отмена")
+                .text("⛔ Отмена")
                 .callbackData(Query.STATE_CANCEL.getCallback())
                 .build();
 
