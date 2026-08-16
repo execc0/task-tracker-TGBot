@@ -47,10 +47,11 @@ public class MessageDeleteScheduler {
         }
 
         messagesToDelete.forEach(value -> {
-
-            messageSender.deleteMessage(parseChatId(value), parseMessageId(value));
-            stringRedisTemplate.opsForZSet().remove(MESSAGE_DELETE_KEY, value);
-
+            try {
+                messageSender.deleteMessage(parseChatId(value), parseMessageId(value));
+            } finally {
+                stringRedisTemplate.opsForZSet().remove(MESSAGE_DELETE_KEY, value);
+            }
         });
         log.info("Сообщения удалены");
 

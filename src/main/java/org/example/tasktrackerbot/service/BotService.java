@@ -198,6 +198,23 @@ public class BotService {
 
     }
 
+    public void deleteOwnTask(String chatId, String taskId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        taskTrackerApiClient.taskDelete(token, taskId);
+
+        sendMessageAndDelete(chatId, "Задача успешно удалена");
+    }
+
+    public TaskResponse getOwnTask(String chatId, String taskId) {
+
+        String token = tokenHandlerService.getToken(chatId);
+
+        return taskTrackerApiClient.getOwnTask(token, taskId);
+
+    }
+
     public void login(String username, String password, String chatId) {
 
         if (tokenHandlerService.hasToken(chatId)) {

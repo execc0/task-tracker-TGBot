@@ -15,6 +15,7 @@ public enum Query {
     CREATE_TASK("task:create"),
     TASKS_NEXT_PAGE("tasks:next"),
     TASKS_PREV_PAGE("tasks:previous"),
+    DELETE_TASK("task:delete"),
 
     LOGIN("auth:login"),
     UNLINK("auth:unlink"),

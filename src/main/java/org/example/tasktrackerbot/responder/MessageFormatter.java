@@ -16,7 +16,7 @@ public class MessageFormatter {
 
     public String formatTaskDTO(TaskResponse taskResponse) {
 
-        return "<b>Задача id#" + taskResponse.getId() + "</b>\n" +
+        return "<b>Задача id№" + taskResponse.getId() + "</b>\n" +
                 "Название: " + taskResponse.getTitle() + "\n" +
                 "Описание: " + taskResponse.getDescription() + "\n" +
                 "Статус: " + taskResponse.getStatus().getText() + "\n" +

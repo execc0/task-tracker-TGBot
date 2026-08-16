@@ -25,6 +25,9 @@ public enum UserState {
     TASK_CREATE_AWAITING_PRIORITY(3, 4, TASK_CREATE_AWAITING_DESCRIPTION, "Выберите приоритет задачи: ",  KeyboardType.TASK_PRIORITY),
     TASK_CREATE_AWAITING_STATUS(4, 4, TASK_CREATE_AWAITING_PRIORITY, "Выберите статус задачи: ", KeyboardType.TASK_STATUS),
 
+    TASK_DELETE_AWAITING_ID(1, 2, NONE, "Введите id задачи для удаления: "),
+    TASK_DELETE_AWAITING_CONFIRMATION(2, 2, TASK_DELETE_AWAITING_ID, "Подтвердите удаление задачи: "),
+
     UNLINK_AWAITING_USERNAME(1, 2, NONE, "Введите ваш username: "),
     UNLINK_AWAITING_PASSWORD(2, 2, UNLINK_AWAITING_USERNAME, "Введите пароль: ");
 

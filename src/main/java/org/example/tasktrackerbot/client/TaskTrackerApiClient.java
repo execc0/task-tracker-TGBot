@@ -2,7 +2,6 @@ package org.example.tasktrackerbot.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.example.tasktrackerbot.DTO.API.request.TaskCreateRequest;
 import org.example.tasktrackerbot.DTO.API.request.UnlinkSocialRequest;
 import org.example.tasktrackerbot.DTO.API.request.signable.LoginAndLinkRequest;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
-import java.util.List;
 
 
 @Component
@@ -69,19 +67,36 @@ public class TaskTrackerApiClient {
     public void userDelete(String token) {
 
         taskTrackerRestClient.delete()
-                .uri("/users/me")
+                .uri("users/me")
                 .header("X-Internal-API-Key", internalApiKey)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
                             String message = extractErrorMessage(response);
-                            throw new ApiLoginException(message,
-                                    String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnUser, сообщение: %s",
+                            throw new ApiRequestException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: userDelete, сообщение: %s",
                                             response.getStatusCode(), message));
                         }
                 )
                 .toBodilessEntity();
 
+    }
+
+    public void taskDelete(String token, String id) {
+
+        taskTrackerRestClient.delete()
+                .uri("tasks/my/{id}", id)
+                .header("X-Internal-API-Key", internalApiKey)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            throw new ApiRequestException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: generalDeleteRequest, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .toBodilessEntity();
 
     }
 
@@ -118,7 +133,7 @@ public class TaskTrackerApiClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
                             String message = extractErrorMessage(response);
-                            throw new ApiLoginException(message,
+                            throw new ApiRequestException(message,
                                     String.format("Ошибка при вызове API, StatusCode: %s метод: generalPatchRequest, uri: %s, сообщение: %s",
                                             response.getStatusCode(), uri, message));
                         }
@@ -138,7 +153,7 @@ public class TaskTrackerApiClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
                             String message = extractErrorMessage(response);
-                            throw new ApiLoginException(message,
+                            throw new ApiRequestException(message,
                                     String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnUser, сообщение: %s",
                                             response.getStatusCode(), message));
                         }
@@ -227,6 +242,27 @@ public class TaskTrackerApiClient {
 
     }
 
+    public TaskResponse getOwnTask(String token, String taskId) {
+
+        return taskTrackerRestClient.get()
+                .uri("tasks/my/{taskId}", taskId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("X-Internal-API-Key", internalApiKey)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
+                            String message = extractErrorMessage(response);
+                            if (message.contains("Неверный формат")) {
+                                message = "Ошибка! ID должен содержать только цифры";
+                            }
+                            throw new ApiRequestException(message,
+                                    String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnTasks, сообщение: %s",
+                                            response.getStatusCode(), message));
+                        }
+                )
+                .body(TaskResponse.class);
+
+    }
+
     public PageResponseDTO<TaskResponse> getOwnTasks(String token, String pageNum) {
 
         return taskTrackerRestClient.get()
@@ -236,7 +272,7 @@ public class TaskTrackerApiClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (req, response) -> {
                             String message = extractErrorMessage(response);
-                            throw new ApiUnlinkException(message,
+                            throw new ApiRequestException(message,
                                     String.format("Ошибка при вызове API, StatusCode: %s метод: getOwnTasks, сообщение: %s",
                                             response.getStatusCode(), message));
                         }
@@ -245,7 +281,6 @@ public class TaskTrackerApiClient {
                 });
 
     }
-
 
     private String extractErrorMessage(ClientHttpResponse response) throws IOException {
 

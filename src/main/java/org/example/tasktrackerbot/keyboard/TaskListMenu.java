@@ -23,6 +23,11 @@ public class TaskListMenu implements Keyboard {
                 .callbackData(KeyboardType.TASK_MENU.getCallback())
                 .build();
 
+        InlineKeyboardButton deleteTaskButton = InlineKeyboardButton.builder()
+                .text("\uD83D\uDDD1\uFE0F Удалить задачу")
+                .callbackData(Query.DELETE_TASK.getCallback())
+                .build();
+
         InlineKeyboardButton createTaskButton = InlineKeyboardButton.builder()
                 .text("<<<")
                 .callbackData(Query.TASKS_PREV_PAGE.getCallback())
@@ -36,7 +41,7 @@ public class TaskListMenu implements Keyboard {
 
         return InlineKeyboardMarkup.builder()
                 .keyboardRow(new InlineKeyboardRow(createTaskButton, getOwnTasksButton))
-                .keyboardRow(new InlineKeyboardRow(returnToTaskMenu))
+                .keyboardRow(new InlineKeyboardRow(returnToTaskMenu, deleteTaskButton))
                 .build();
 
 

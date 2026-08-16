@@ -89,7 +89,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
         }
 
         // Получаем или создаем лок для конкретного chatId
-        ReentrantLock lock = chatLocks.get(chatId, id -> new ReentrantLock());
+        ReentrantLock lock = chatLocks.get(chatId, id -> new ReentrantLock(true));
         lock.lock();
         try {
 
@@ -115,7 +115,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
 
         // Если нет текста и не было нажатия на кнопку - проблема
         if (!update.getMessage().hasText()) {
-            throw new InvalidCommandInputException("Текст сообщения пуст",
+            throw new InvalidCommandInputException("Текст сообщения пуст.",
                     String.format("Сообщение chatId: %s не имеет текста", chatId));
         }
         log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
