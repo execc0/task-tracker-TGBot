@@ -1,5 +1,6 @@
 package org.example.tasktrackerbot.keyboard;
 
+import org.example.tasktrackerbot.queries.Query;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -15,23 +16,23 @@ public class TaskPriorityKeyboard implements Keyboard {
     @Override
     public InlineKeyboardMarkup getKeyboard() {
 
-        InlineKeyboardButton TODOButton = InlineKeyboardButton.builder()
-                .text("\uD83D\uDFE2 LOW")
-                .callbackData("priority:LOW")
+        InlineKeyboardButton LOWButton = InlineKeyboardButton.builder()
+                .text(Query.PRIORITY_LOW.getText())
+                .callbackData(Query.PRIORITY_LOW.getCallback())
                 .build();
 
-        InlineKeyboardButton inProgressButton = InlineKeyboardButton.builder()
-                .text("⚠️ MEDIUM")
-                .callbackData("priority:MEDIUM")
+        InlineKeyboardButton MEDIUMButton = InlineKeyboardButton.builder()
+                .text(Query.PRIORITY_MEDIUM.getText())
+                .callbackData(Query.PRIORITY_MEDIUM.getCallback())
                 .build();
 
-        InlineKeyboardButton doneButton = InlineKeyboardButton.builder()
-                .text("\uD83D\uDD25 HIGH")
-                .callbackData("priority:HIGH")
+        InlineKeyboardButton HIGHButton = InlineKeyboardButton.builder()
+                .text(Query.PRIORITY_HIGH.getText())
+                .callbackData(Query.PRIORITY_HIGH.getCallback())
                 .build();
 
         return InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(TODOButton, inProgressButton, doneButton))
+                .keyboardRow(new InlineKeyboardRow(LOWButton, MEDIUMButton, HIGHButton))
                 .keyboardRow(getCancelOrReturnRow())
                 .build();
     }

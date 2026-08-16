@@ -1,4 +1,7 @@
 package org.example.tasktrackerbot.queries;
+import org.example.tasktrackerbot.DTO.API.request.Priority;
+import org.example.tasktrackerbot.DTO.API.request.Status;
+
 
 import lombok.Getter;
 
@@ -28,18 +31,31 @@ public enum Query {
     UPDATE_USERNAME("user:username"),
     UPDATE_EMAIL("user:email"),
     UPDATE_PASSWORD("user:password"),
-    UPDATE_NAME("user:name");
+    UPDATE_NAME("user:name"),
 
-    // STATUS_TODO,
-    // STATUS_IN_PROGRESS,
-    // STATUS_DONE;
+    STATUS_TODO("status:TODO", Status.TODO.getText()),
+    STATUS_IN_PROGRESS("status:IN_PROGRESS", Status.IN_PROGRESS.getText()),
+    STATUS_DONE("status:DONE", Status.DONE.getText()),
+
+    PRIORITY_LOW("priority:LOW", Priority.LOW.getText()),
+    PRIORITY_MEDIUM("priority:MEDIUM", Priority.MEDIUM.getText()),
+    PRIORITY_HIGH("priority:HIGH", Priority.HIGH.getText());
 
     @Getter
     private final String callback;
-//  private final String input;
+    @Getter
+    private final String text;
+
     Query(String callback) {
         this.callback = callback;
+        this.text = null;
     }
+
+    Query(String callback, String text) {
+        this.callback = callback;
+        this.text = text;
+    }
+
 
 
 }

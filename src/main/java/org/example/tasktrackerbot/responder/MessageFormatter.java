@@ -3,7 +3,6 @@ package org.example.tasktrackerbot.responder;
 import org.example.tasktrackerbot.DTO.API.response.PageResponseDTO;
 import org.example.tasktrackerbot.DTO.API.response.TaskResponse;
 import org.example.tasktrackerbot.DTO.API.response.UserResponse;
-import org.example.tasktrackerbot.DTO.Telegram.TaskResponseDTO;
 import org.example.tasktrackerbot.session.UserState;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +16,11 @@ public class MessageFormatter {
 
     public String formatTaskDTO(TaskResponse taskResponse) {
 
-        return "Задача id#" + taskResponse.getId() + "\n" +
+        return "<b>Задача id#" + taskResponse.getId() + "</b>\n" +
                 "Название: " + taskResponse.getTitle() + "\n" +
                 "Описание: " + taskResponse.getDescription() + "\n" +
-                "Статус: " + taskResponse.getStatus() + "\n" +
-                "Приоритет: " + taskResponse.getPriority() + "\n\n";
+                "Статус: " + taskResponse.getStatus().getText() + "\n" +
+                "Приоритет: " + taskResponse.getPriority().getText() + "\n\n";
 
     }
 
