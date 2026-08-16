@@ -118,7 +118,6 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
             throw new InvalidCommandInputException("Текст сообщения пуст.",
                     String.format("Сообщение chatId: %s не имеет текста", chatId));
         }
-        log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
 
         // State - обработка ввода после нажатия на кнопку
         if(userStateService.getState(chatId) != UserState.NONE) {
@@ -128,6 +127,7 @@ public class UpdateHandler implements LongPollingUpdateConsumer {
             return;
         }
 
+        log.info("Получено сообщение из telegram: {}", update.getMessage().getText());
         // Обработка обычных команд
         String command = parseCommand(update);
         transaction.setName("Telegram command input: " + command);

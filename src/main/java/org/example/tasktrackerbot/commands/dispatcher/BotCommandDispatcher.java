@@ -31,13 +31,13 @@ public class BotCommandDispatcher {
 
     public void dispatchCommand(Update update, String command, String chatId) {
         log.info("Получена команда из telegram: {}, chatId: {}", command, chatId);
+        Integer messageId = update.getMessage().getMessageId();
+        messageSender.deleteMessage(chatId, messageId.toString());
         if (!commandToQueryMap.containsKey(command)) {
             throw new InvalidCommandInputException("Ошибка! Введена неверная команда: " + command
                     + "\nДля начала работы введите /start");
         }
         String query = commandToQueryMap.get(command);
-        Integer messageId = update.getMessage().getMessageId();
-        messageSender.deleteMessage(chatId, messageId.toString());
         botCallbackQueryDispatcher.dispatchCallbackQuery(query, chatId, null);
 
     }

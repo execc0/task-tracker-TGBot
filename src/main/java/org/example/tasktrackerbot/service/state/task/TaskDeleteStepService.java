@@ -56,24 +56,24 @@ public class TaskDeleteStepService extends AbstractStateService implements Query
 
     }
 
-    public void handleIdStep(String chatId, String taskId, Integer userMessageId) {
+    public void handleIdStep(String chatId, String taskId) {
 
         TaskResponse task = botService.getOwnTask(chatId, taskId);
 
         String taskFormatted = messageFormatter.formatTaskDTO(task);
         String message = "Подтвердите удаление задачи: \n\n" + taskFormatted;
 
-        super.handleNextStep(chatId, userMessageId, UserState.TASK_DELETE_AWAITING_CONFIRMATION, "task_id", taskId, message,
+        super.handleNextStep(chatId, UserState.TASK_DELETE_AWAITING_CONFIRMATION, "task_id", taskId, message,
                 keyboardProviderMap.get(KeyboardType.CANCEL_OR_CONFIRM).getKeyboard());
 
 
     }
 
-    public void handleConfirmationStep(String chatId, String value, Integer userMessageId) {
+    public void handleConfirmationStep(String chatId, String value) {
 
         String taskId = userStateService.getTempField(chatId, "task_id");
         botService.deleteOwnTask(chatId, taskId);
-        super.finishFlow(chatId, userMessageId);
+        super.finishFlow(chatId);
 
     }
 }

@@ -51,14 +51,14 @@ public class UnlinkStepService extends AbstractStateService implements StepHandl
         super.start(chatId, UserState.UNLINK_AWAITING_USERNAME);
     }
 
-    public void handleUsernameStep(String chatId, String username, Integer messageId) {
-        super.handleNextStep(chatId, messageId, UserState.UNLINK_AWAITING_PASSWORD, "username", username, "Введите пароль: ");
+    public void handleUsernameStep(String chatId, String username) {
+        super.handleNextStep(chatId, UserState.UNLINK_AWAITING_PASSWORD, "username", username, "Введите пароль: ");
     }
 
-    public void handlePasswordStep(String chatId, String password, Integer messageId) {
+    public void handlePasswordStep(String chatId, String password) {
 
         userStateService.setTemp(chatId, "password", password);
-        UnlinkSocialRequest request = super.finishFlow(chatId, messageId, UnlinkSocialRequest.class);
+        UnlinkSocialRequest request = super.finishFlow(chatId, UnlinkSocialRequest.class);
         botService.unlink(request.getUsername(), request.getPassword(), chatId);
 
 

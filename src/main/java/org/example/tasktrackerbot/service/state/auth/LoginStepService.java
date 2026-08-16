@@ -55,14 +55,14 @@ public class LoginStepService extends AbstractStateService implements StepHandle
         super.start(chatId, UserState.LOGIN_AWAITING_USERNAME);
     }
 
-    public void handleUsernameStep(String chatId, String username, Integer messageId) {
-        super.handleNextStep(chatId, messageId, UserState.LOGIN_AWAITING_PASSWORD, "username", username, "Введите пароль: ");
+    public void handleUsernameStep(String chatId, String username) {
+        super.handleNextStep(chatId, UserState.LOGIN_AWAITING_PASSWORD, "username", username, "Введите пароль: ");
     }
 
-    public void handlePasswordStep(String chatId, String password, Integer messageId) {
+    public void handlePasswordStep(String chatId, String password) {
 
         userStateService.setTemp(chatId, "password", password);
-        UserLoginRequest request = super.finishFlow(chatId, messageId, UserLoginRequest.class);
+        UserLoginRequest request = super.finishFlow(chatId, UserLoginRequest.class);
         botService.login(request.getUsername(), request.getPassword(), chatId);
         navigationService.mainMenu(chatId);
 

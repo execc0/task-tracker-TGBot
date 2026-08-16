@@ -54,9 +54,9 @@ public class PasswordUpdateStateService extends AbstractStateService implements 
 
     }
 
-    public void handlePasswordStep(String chatId, String password, Integer messageId) {
+    public void handlePasswordStep(String chatId, String password) {
 
-        super.finishFlow(chatId, messageId);
+        super.finishFlow(chatId);
         botService.updateOwnPassword(chatId, password);
 
     }

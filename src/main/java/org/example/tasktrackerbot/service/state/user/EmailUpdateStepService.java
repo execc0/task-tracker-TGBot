@@ -52,9 +52,9 @@ public class EmailUpdateStepService extends AbstractStateService implements Step
         super.start(chatId, UserState.USER_CHANGE_AWAITING_EMAIL);
     }
 
-    public void handleEmailStep(String chatId, String email, Integer messageId) {
+    public void handleEmailStep(String chatId, String email) {
 
-        super.finishFlow(chatId, messageId);
+        super.finishFlow(chatId);
         botService.updateOwnEmail(chatId, email);
 
     }

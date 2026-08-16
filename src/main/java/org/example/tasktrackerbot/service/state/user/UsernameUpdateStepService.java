@@ -54,9 +54,9 @@ public class UsernameUpdateStepService extends AbstractStateService implements S
 
     }
 
-    private void handleUsernameStep(String chatId, String username, Integer messageId) {
+    private void handleUsernameStep(String chatId, String username) {
 
-        super.finishFlow(chatId, messageId);
+        super.finishFlow(chatId);
         botService.updateOwnUsername(chatId, username);
 
     }

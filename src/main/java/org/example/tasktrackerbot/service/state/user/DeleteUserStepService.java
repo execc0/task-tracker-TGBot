@@ -54,8 +54,8 @@ public class DeleteUserStepService extends AbstractStateService implements StepH
 
     }
 
-    public void handleConfirmStep(String chatId, String value, Integer messageId) {
-        super.finishFlow(chatId, messageId);
+    public void handleConfirmStep(String chatId, String value) {
+        super.finishFlow(chatId);
         botService.deleteOwnUser(chatId);
 
     }

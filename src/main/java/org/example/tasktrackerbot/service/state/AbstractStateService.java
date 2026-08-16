@@ -56,7 +56,7 @@ public abstract class AbstractStateService {
             String canceledId = userStateService.getTempField(chatId, "bot_message_id");
             scheduleMessageDelete(chatId, messageToDelete.toString(), 10);
             if (canceledId != null && !canceledId.isEmpty()) {
-                deleteUserMessage(chatId, Integer.parseInt(canceledId));
+                messageSender.deleteMessage(chatId, canceledId);
             }
         }
 
@@ -75,18 +75,17 @@ public abstract class AbstractStateService {
 
     }
 
-    protected void handleNextStep(String chatId, Integer userMessageId, UserState nextState, String key,
+    protected void handleNextStep(String chatId, UserState nextState, String key,
                                   String input, String message) {
         userStateService.setState(chatId, nextState);
         userStateService.setTemp(chatId, key, input);
         String messageId = userStateService.getTempField(chatId, "bot_message_id");
         String messageWithBar = messageFormatter.buildProgressBar(nextState) + "\n" + message;
         messageSender.editOrSendNewMessage(chatId, messageId, messageWithBar, cancelOrReturnKeyboard.getKeyboard());
-        deleteUserMessage(chatId, userMessageId);
     }
 
 
-    protected void handleNextStep(String chatId, Integer userMessageId, UserState nextState, String key,
+    protected void handleNextStep(String chatId, UserState nextState, String key,
                                   String input, String message,
                                   InlineKeyboardMarkup keyboard) {
         userStateService.setState(chatId, nextState);
@@ -94,12 +93,11 @@ public abstract class AbstractStateService {
         String messageId = userStateService.getTempField(chatId, "bot_message_id");
         String messageWithBar = messageFormatter.buildProgressBar(nextState) + "\n" + message;
         messageSender.editMessage(chatId, messageId, messageWithBar, keyboard);
-        deleteUserMessage(chatId, userMessageId);
     }
 
 
 
-    protected <T> T finishFlow(String chatId, Integer userMessageId, Class<T> DTOClass) {
+    protected <T> T finishFlow(String chatId, Class<T> DTOClass) {
 
         Map<Object, Object> map = userStateService.getAllTempFields(chatId);
         T request = objectMapper.convertValue(map, DTOClass);
@@ -107,35 +105,22 @@ public abstract class AbstractStateService {
         userStateService.clearTemp(chatId);
         userStateService.clearState(chatId);
         scheduleMessageDelete(chatId, messageToDelete, 5);
-        deleteUserMessage(chatId, userMessageId);
         return request;
 
     }
 
-    protected void finishFlow(String chatId, Integer userMessageId) {
+    protected void finishFlow(String chatId) {
 
         String messageToDelete = userStateService.getTempField(chatId, "bot_message_id");
         userStateService.clearTemp(chatId);
         userStateService.clearState(chatId);
         scheduleMessageDelete(chatId, messageToDelete, 5);
-        deleteUserMessage(chatId, userMessageId);
 
     }
 
 
     protected void scheduleMessageDelete(String chatId, String messageId, Integer delaySeconds) {
         messageDeleteScheduler.scheduleDelete(chatId, messageId, delaySeconds);
-    }
-
-    protected void scheduleMessageDelete(String chatId, String messageId) {
-        messageDeleteScheduler.scheduleDelete(chatId, messageId, 10);
-    }
-
-
-    protected void deleteUserMessage(String chatId, Integer userMessageId) {
-        if (userMessageId != null) {
-            messageSender.deleteMessage(chatId, userMessageId.toString());
-        }
     }
 
 

@@ -54,9 +54,9 @@ public class NameUpdateStateService extends AbstractStateService implements Quer
 
     }
 
-    public void handleNameStep(String chatId, String name, Integer userMessageId) {
+    public void handleNameStep(String chatId, String name) {
 
-        super.finishFlow(chatId, userMessageId);
+        super.finishFlow(chatId);
         botService.updateOwnName(chatId, name);
 
     }

@@ -54,30 +54,30 @@ public class TaskStepService extends AbstractStateService implements StepHandler
 
     }
 
-    public void handleTitleStep(String chatId, String title, Integer messageId) {
+    public void handleTitleStep(String chatId, String title) {
 
-        super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_DESCRIPTION, "title", title, "Введите описание задачи: ");
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_DESCRIPTION, "title", title, "Введите описание задачи: ");
 
     }
 
-    public void handleDescriptionStep(String chatId, String description, Integer messageId) {
+    public void handleDescriptionStep(String chatId, String description) {
 
-        super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_PRIORITY, "description",
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_PRIORITY, "description",
                 description, "Выберите приоритет задачи: ", keyboardProviderMap.get(KeyboardType.TASK_PRIORITY).getKeyboard());
 
     }
 
-    public void handlePriorityStep(String chatId, String priority, Integer messageId) {
+    public void handlePriorityStep(String chatId, String priority) {
 
-        super.handleNextStep(chatId, messageId, UserState.TASK_CREATE_AWAITING_STATUS, "priority",
+        super.handleNextStep(chatId, UserState.TASK_CREATE_AWAITING_STATUS, "priority",
                 priority, "Выберите статус задачи: ", keyboardProviderMap.get(KeyboardType.TASK_STATUS).getKeyboard());
 
     }
 
-    public void handleStatusStep(String chatId, String status, Integer messageId) {
+    public void handleStatusStep(String chatId, String status) {
 
         userStateService.setTemp(chatId, "status", status);
-        TaskCreateRequest request = super.finishFlow(chatId, messageId, TaskCreateRequest.class);
+        TaskCreateRequest request = super.finishFlow(chatId, TaskCreateRequest.class);
         botService.createOwnTask(request, chatId);
 
 
