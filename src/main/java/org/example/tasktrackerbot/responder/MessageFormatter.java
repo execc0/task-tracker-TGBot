@@ -45,10 +45,15 @@ public class MessageFormatter {
 
     public String formatUserDTO(UserResponse userResponse) {
 
+        String email = userResponse.getEmail();
+        if (email == null) {
+            email = "Не установлен";
+        }
+
         return "<b>Пользователь</b> id#" + userResponse.getId() + "\n" +
                 "<b>Имя:</b> " + userResponse.getName() + "\n" +
                 "<b>Username:</b> " + userResponse.getUsername() + "\n" +
-                "<b>Email:</b> " + userResponse.getEmail() + "\n";
+                "<b>Email:</b> " + email + "\n";
 
     }
 
