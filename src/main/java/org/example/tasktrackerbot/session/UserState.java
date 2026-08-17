@@ -6,10 +6,8 @@ import org.example.tasktrackerbot.keyboard.KeyboardType;
 public enum UserState {
     NONE(0, 0),
 
-    REGISTER_AWAITING_NAME(1, 4, NONE, "Введите ваше имя:"),
-    REGISTER_AWAITING_USERNAME(2, 4, REGISTER_AWAITING_NAME, "Введите ваш username: "),
-    REGISTER_AWAITING_EMAIL(3, 4, REGISTER_AWAITING_USERNAME, "Введите ваш email: "),
-    REGISTER_AWAITING_PASSWORD(4, 4, REGISTER_AWAITING_EMAIL, "Введите ваш пароль: "),
+    REGISTER_AWAITING_USERNAME(1, 2, NONE, "Введите ваш username: "),
+    REGISTER_AWAITING_PASSWORD(2, 2, REGISTER_AWAITING_USERNAME, "Введите ваш пароль: "),
 
     LOGIN_AWAITING_USERNAME(1, 2, NONE, "Введите ваш username: "),
     LOGIN_AWAITING_PASSWORD(2, 2, LOGIN_AWAITING_USERNAME, "Введите пароль: "),

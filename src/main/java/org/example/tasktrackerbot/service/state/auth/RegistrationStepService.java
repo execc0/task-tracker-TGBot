@@ -41,9 +41,7 @@ public class RegistrationStepService extends AbstractStateService implements Ste
 
 
     public Map<UserState, StepHandler> getStepHandlers() {
-        return Map.of(UserState.REGISTER_AWAITING_NAME, this::handleNameStep,
-                UserState.REGISTER_AWAITING_USERNAME, this::handleUsernameStep,
-                UserState.REGISTER_AWAITING_EMAIL, this::handleEmailStep,
+        return Map.of(UserState.REGISTER_AWAITING_USERNAME, this::handleUsernameStep,
                 UserState.REGISTER_AWAITING_PASSWORD, this::handlePasswordStep);
     }
 
@@ -52,26 +50,19 @@ public class RegistrationStepService extends AbstractStateService implements Ste
     }
 
     public void startRegistration(String chatId) {
-        super.start(chatId, UserState.REGISTER_AWAITING_NAME);
+        super.start(chatId, UserState.REGISTER_AWAITING_USERNAME);
     }
 
-    public void handleNameStep(String chatId, String name) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_USERNAME, "name", name, "Введите ваш username: ");
-    }
 
     public void handleUsernameStep(String chatId, String username) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_EMAIL, "username", username, "Введите ваш email: ");
-    }
-
-    public void handleEmailStep(String chatId, String email) {
-        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_PASSWORD, "email", email, "Введите ваш пароль: ");
+        super.handleNextStep(chatId, UserState.REGISTER_AWAITING_PASSWORD, "username", username, "Введите ваш пароль: ");
     }
 
     public void handlePasswordStep(String chatId, String password) {
 
         userStateService.setTemp(chatId, "password", password);
         UserRegisterRequest request = super.finishFlow(chatId, UserRegisterRequest.class);
-        botService.register(request.getName(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
+        botService.register(request.getUsername(), request.getUsername(), request.getEmail(), request.getPassword(), chatId);
         navigationService.mainMenu(chatId);
 
     }

@@ -22,8 +22,7 @@ public class AuthorizationFilter {
     private static final Set<String> COMMANDS_REQUIRE_NO_AUTH = Set.of("/login", "/register");
     private static final Set<UserState> STATES_NEED_NO_AUTH = Set.of(
             UserState.LOGIN_AWAITING_USERNAME, UserState.LOGIN_AWAITING_PASSWORD,
-            UserState.REGISTER_AWAITING_USERNAME, UserState.REGISTER_AWAITING_NAME,
-            UserState.REGISTER_AWAITING_EMAIL, UserState.REGISTER_AWAITING_PASSWORD
+            UserState.REGISTER_AWAITING_USERNAME, UserState.REGISTER_AWAITING_PASSWORD
     );
 
     public AuthorizationFilter(MessageSender messageSender, BotService botService, UserStateService userStateService) {
